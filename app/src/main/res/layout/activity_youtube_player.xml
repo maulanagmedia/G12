@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingLeft="@dimen/default_margin_small"
+        android:paddingRight="@dimen/default_margin_small"
+        android:orientation="horizontal"
+        android:id="@+id/ll_search_container">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SearchView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:id="@+id/edt_search"
+                android:queryHint="Cari Video..."/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:gravity="center_vertical"
+                android:paddingLeft="45dp"
+                android:textStyle="bold"
+                android:id="@+id/tv_search"
+                android:text=" CARI VIDEO"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_search_container"
+        android:id="@+id/ll_youtube_container"
+        android:orientation="vertical">
+
+        <com.google.android.youtube.player.YouTubePlayerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/yp_youtube"></com.google.android.youtube.player.YouTubePlayerView>
+
+    </LinearLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/ll_youtube_container"
+        android:layout_marginRight="@dimen/default_vertical_margin"
+        android:layout_marginLeft="@dimen/default_vertical_margin"
+        android:layout_marginTop="@dimen/default_vertical_margin"
+        android:nestedScrollingEnabled="false"
+        android:id="@+id/rv_youtube"></android.support.v7.widget.RecyclerView>
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/pb_loading"
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" />
+</RelativeLayout>

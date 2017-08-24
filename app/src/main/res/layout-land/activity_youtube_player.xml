@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/ic_background"
+    tools:context="id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/default_vertical_margin"
+        android:orientation="horizontal"
+        android:weightSum="1"
+        android:layout_alignParentStart="true">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="0.7"
+            android:layout_height="match_parent"
+            android:weightSum="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="@dimen/default_margin_small"
+                android:layout_marginBottom="@dimen/default_margin_small"
+                android:paddingLeft="@dimen/default_margin_small"
+                android:paddingRight="@dimen/default_margin_small"
+                android:orientation="horizontal"
+                android:id="@+id/ll_search_container"
+                android:weightSum="1">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_weight="0.2"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_youtube"
+                    />
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="0.8"
+                    android:id="@+id/rv_searchview"
+                    android:layout_height="match_parent">
+
+                    <SearchView
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:id="@+id/edt_search"
+                        android:background="@drawable/rounded_white"
+                        android:queryHint="Cari Video..."/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_centerInParent="true"
+                        android:gravity="center_vertical"
+                        android:paddingLeft="45dp"
+                        android:textStyle="bold"
+                        android:id="@+id/tv_search"
+                        android:text=" CARI VIDEO"/>
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <com.google.android.youtube.player.YouTubePlayerView
+                android:layout_width="match_parent"
+                android:layout_marginLeft="@dimen/default_vertical_margin"
+                android:layout_height="match_parent"
+                android:id="@+id/yp_youtube"></com.google.android.youtube.player.YouTubePlayerView>
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_weight="0.3"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginRight="@dimen/default_vertical_margin"
+                android:layout_marginLeft="@dimen/default_vertical_margin"
+                android:nestedScrollingEnabled="false"
+                android:id="@+id/rv_youtube"></android.support.v7.widget.RecyclerView>
+
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/pb_loading"
+                android:visibility="gone" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</RelativeLayout>

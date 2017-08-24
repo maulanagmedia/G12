@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="default_vertical">16dp</dimen>
+    <dimen name="default_horizontal">64dp</dimen>
+
+    <dimen name="rounded_corner">3dp</dimen>
+    <dimen name="default_margin_small">8dp</dimen>
+
+    <dimen name="default_icon">80dp</dimen>
+    <dimen name="default_elevation">3dp</dimen>
+    <dimen name="default_rounded">3dp</dimen>
+
+    <dimen name="default_horizontal_margin">8dp</dimen>
+    <dimen name="default_vertical_margin">4dp</dimen>
+    <dimen name="default_min_height">190dp</dimen>
+    <dimen name="default_play_size">80dp</dimen>
+
+    <dimen name="default_title_font">14sp</dimen>
+    <dimen name="corner_input_text">20dp</dimen>
+</resources>

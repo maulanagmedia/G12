@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Gmedia TV</string>
+
+    <string name="api_error">Terjadi kesalahan saat mengakses data, mohon coba kembali</string>
+    <string name="api_unauthorized">Anda tidak memiliki akses ke halaman ini</string>
+
+    <string name="player_error">Error initializing YouTube player: %s</string>
+    <string name="seek_to">Jump To</string>
+    <string name="seek_to_hint">Seconds</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:bottomLeftRadius="@dimen/corner_input_text"
+                android:bottomRightRadius="@dimen/corner_input_text"
+                android:topLeftRadius="@dimen/corner_input_text"
+                android:topRightRadius="@dimen/corner_input_text"
+                android:radius="@dimen/corner_input_text"></corners>
+            <solid android:color="@color/color_white"></solid>
+        </shape>
+    </item>
+</selector>
