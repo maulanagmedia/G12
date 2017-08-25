@@ -16,7 +16,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.7"
+            android:layout_weight="1"
             android:orientation="horizontal"
             android:layout_marginTop="@dimen/default_vertical_margin"
             android:layout_marginBottom="@dimen/default_vertical_margin"
@@ -35,9 +35,10 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.7"
+                    android:layout_weight="0.3"
                     android:id="@+id/iv_channel"
-                    android:src="@drawable/ic_channel"/>
+                    android:src="@drawable/ic_channel"
+                    android:scaleType="center"/>
             </LinearLayout>
 
             <LinearLayout
@@ -51,42 +52,41 @@
                 <ImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.4"
+                    android:layout_weight="0.3"
                     android:id="@+id/iv_youtube"
                     android:src="@drawable/ic_youtube"/>
             </LinearLayout>
         </LinearLayout>
+    </LinearLayout>
 
-        <LinearLayout
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/default_margin_small">
+
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.3"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_white"
+            android:layout_marginBottom="@dimen/default_margin_small"
             android:gravity="center"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/default_margin_small">
+            android:text="@string/support_text"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/color_white"
-                android:layout_marginBottom="@dimen/default_margin_small"
-                android:gravity="center"
-                android:text="@string/support_text"/>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="24dp"
+            android:layout_marginBottom="@dimen/default_margin_small"
+            android:src="@drawable/ic_logo_gmedia"/>
 
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="24dp"
-                android:layout_marginBottom="@dimen/default_margin_small"
-                android:src="@drawable/ic_logo_gmedia"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/color_white"
-                android:layout_marginBottom="@dimen/default_margin_small"
-                android:gravity="center"
-                android:text="www.gmedia.net.id"/>
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_white"
+            android:layout_marginBottom="@dimen/default_margin_small"
+            android:gravity="center"
+            android:text="www.gmedia.net.id"/>
     </LinearLayout>
 </RelativeLayout>
