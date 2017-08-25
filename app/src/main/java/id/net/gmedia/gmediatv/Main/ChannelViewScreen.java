@@ -35,7 +35,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import id.net.gmedia.gmediatv.Adapter.ListChanelAdapter;
+import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
@@ -46,7 +46,6 @@ public class ChannelViewScreen extends AppCompatActivity {
     private static VideoView vvPlayVideo;
     private ItemValidation iv = new ItemValidation();
     private boolean showNavigator = false;
-    private boolean doubleBackToExitPressedOnce = false, exitState = false;
     private TextView tvVolume;
     private SeekBar sbVolume;
     private AudioManager audioManager;
@@ -96,17 +95,14 @@ public class ChannelViewScreen extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_view_screen);
 
+        savedChanel = new SavedChanelManager(ChannelViewScreen.this);
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
 
-            if(bundle.getBoolean("exit", false)){
-                exitState = true;
-                overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);
-                finish();
-            }
+            String nama = bundle.getString("nama");
+            String link = bundle.getString("link");
+            if(nama != null && link != null) savedChanel.saveLastChanel(nama,link);
         }
-
-        savedChanel = new SavedChanelManager(ChannelViewScreen.this);
 
         initUI();
     }
@@ -403,7 +399,7 @@ public class ChannelViewScreen extends AppCompatActivity {
 
                             if(i == 0 && !savedChanel.isSaved()){
                                 playVideo(jo.getString("nama"), jo.getString("link"));
-                            }else if(savedChanel.isSaved() && jo.getString("link").trim().equals(savedChanel.getLink().trim())){
+                            }else if(savedChanel.isSaved() && jo.getString("link").trim().equals(savedChanel.getLink().trim())&& jo.getString("nama").trim().equals(savedChanel.getNama().trim())){
                                 x = i;
                             }
                         }
@@ -508,25 +504,7 @@ public class ChannelViewScreen extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (doubleBackToExitPressedOnce) {
-
-            Intent intent = new Intent(ChannelViewScreen.this, ChannelViewScreen.class);
-            intent.putExtra("exit", true);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            //System.exit(0);
-        }
-
-        if(!exitState){
-            this.doubleBackToExitPressedOnce = true;
-            Toast.makeText(this, getResources().getString(R.string.app_exit), Toast.LENGTH_SHORT).show();
-        }
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce=false;
-            }
-        }, 2000);
+        super.onBackPressed();
+        finish();
     }
 }

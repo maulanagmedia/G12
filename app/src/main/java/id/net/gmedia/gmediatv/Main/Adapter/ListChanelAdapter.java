@@ -1,4 +1,4 @@
-package id.net.gmedia.gmediatv.Adapter;
+package id.net.gmedia.gmediatv.Main.Adapter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
