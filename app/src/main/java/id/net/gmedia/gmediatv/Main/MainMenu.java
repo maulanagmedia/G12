@@ -1,11 +1,13 @@
 package id.net.gmedia.gmediatv.Main;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.youtube.player.YouTubePlayer;
@@ -15,9 +17,9 @@ import id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity;
 
 public class MainMenu extends AppCompatActivity {
 
-    private ImageView ivChannel;
-    private ImageView ivYoutube;
     private boolean doubleBackToExitPressedOnce = false, exitState = false;
+    private LinearLayout llTV, llYoutube;
+    private ImageView ivTV, ivYoutube;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,15 +40,17 @@ public class MainMenu extends AppCompatActivity {
 
     private void initUI() {
 
-        ivChannel = (ImageView) findViewById(R.id.iv_channel);
-        ivYoutube = (ImageView) findViewById(R.id.iv_youtube);
+        llTV = (LinearLayout) findViewById(R.id.ll_tv);
+        llYoutube = (LinearLayout) findViewById(R.id.ll_yt);
+        ivTV = (ImageView) findViewById(R.id.iv_tv);
+        ivYoutube = (ImageView) findViewById(R.id.iv_yt);
 
         initEvent();
     }
 
     private void initEvent() {
 
-        ivChannel.setOnClickListener(new View.OnClickListener() {
+        ivTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 

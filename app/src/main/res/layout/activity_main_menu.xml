@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/ic_background"
+    android:background="@drawable/ic_background_blur"
     tools:context="id.net.gmedia.gmediatv.Main.MainMenu">
 
     <LinearLayout
@@ -32,13 +32,47 @@
                 android:gravity="center"
                 android:weightSum="1">
 
-                <ImageView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.3"
-                    android:id="@+id/iv_channel"
-                    android:src="@drawable/ic_channel"
-                    android:scaleType="center"/>
+                    android:layout_weight="0.4"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="0.2"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"></LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_tv"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.4"
+                        android:orientation="vertical"
+                        android:weightSum="1">
+                        
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.7"
+                            android:src="@drawable/btn_tv"
+                            android:id="@+id/iv_tv"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.3"
+                            android:gravity="center"
+                            android:text="@string/tv_text"
+                            android:textSize="@dimen/title_text"
+                            android:textStyle="bold"
+                            android:textColor="@color/color_white"/>
+                    </LinearLayout>
+
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
@@ -49,12 +83,46 @@
                 android:gravity="center"
                 android:weightSum="1">
 
-                <ImageView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="0.3"
-                    android:id="@+id/iv_youtube"
-                    android:src="@drawable/ic_youtube"/>
+                    android:layout_weight="0.4"
+                    android:weightSum="1"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/ll_yt"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.4"
+                        android:orientation="vertical"
+                        android:weightSum="1">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.7"
+                            android:src="@drawable/btn_yt"
+                            android:id="@+id/iv_yt"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.3"
+                            android:gravity="center"
+                            android:text="Youtube"
+                            android:textSize="@dimen/title_text"
+                            android:textStyle="bold"
+                            android:textColor="@color/color_white"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="0.2"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal"></LinearLayout>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

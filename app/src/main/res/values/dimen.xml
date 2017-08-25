@@ -18,4 +18,5 @@
 
     <dimen name="default_title_font">14sp</dimen>
     <dimen name="corner_input_text">20dp</dimen>
+    <dimen name="title_text">20sp</dimen>
 </resources>
