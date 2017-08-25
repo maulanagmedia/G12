@@ -5,7 +5,8 @@ import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
-import id.net.gmedia.gmediatv.DaftarVideo.DaftarVideo;
+import id.net.gmedia.gmediatv.Main.ChannelViewScreen;
+import id.net.gmedia.gmediatv.Main.MainMenu;
 
 public class SplashScreen extends AppCompatActivity {
 
@@ -21,19 +22,24 @@ public class SplashScreen extends AppCompatActivity {
             new Handler().postDelayed(new Runnable() {
                 public void run() {
                     //startActivity(new Intent(SplashScreen.this, DaftarVideo.class));
-                    startActivity(new Intent(SplashScreen.this, VideoViewScreen.class));
+                    startActivity(new Intent(SplashScreen.this, MainMenu.class));
                     finish();
                 }
             }, secondsDelayed * 1000);
 
-            splashLoaded = true;
+            //splashLoaded = true;
         }
         else {
             //Intent goToMainActivity = new Intent(SplashScreen.this, DaftarVideo.class);
-            Intent goToMainActivity = new Intent(SplashScreen.this, VideoViewScreen.class);
+            Intent goToMainActivity = new Intent(SplashScreen.this, MainMenu.class);
             goToMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(goToMainActivity);
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }
