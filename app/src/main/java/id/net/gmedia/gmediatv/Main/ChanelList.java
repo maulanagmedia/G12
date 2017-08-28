@@ -1,10 +1,13 @@
 package id.net.gmedia.gmediatv.Main;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ProgressBar;
@@ -104,5 +107,51 @@ public class ChanelList extends AppCompatActivity {
             rvChanggelList.setItemAnimator(new DefaultItemAnimator());
             rvChanggelList.setAdapter(menuAdapter);
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        int maxleng = masterList.size();
+        switch (keyCode){
+            case 19:
+                if(AllChannelAdapter.selectedPosition - 4 >= 0){
+                    AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition - 4;
+                    AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 20:
+                if(AllChannelAdapter.selectedPosition + 4 < maxleng){
+                    AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition + 4;
+                    AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 22:
+                if(AllChannelAdapter.selectedPosition + 1 < maxleng){
+                    AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition + 1;
+                    AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 21:
+                if(AllChannelAdapter.selectedPosition - 1 >= 0){
+                    AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition - 1;
+                    AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 23:
+
+                CustomItem item = masterList.get(AllChannelAdapter.selectedPosition);
+                Intent intent = new Intent(ChanelList.this, ChannelViewScreen.class);
+                intent.putExtra("nama", item.getItem2());
+                intent.putExtra("link", item.getItem3());
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

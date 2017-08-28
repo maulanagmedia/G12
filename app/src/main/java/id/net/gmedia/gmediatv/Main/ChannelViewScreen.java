@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,6 +36,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import id.net.gmedia.gmediatv.Main.Adapter.AllChannelAdapter;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
@@ -504,7 +506,63 @@ public class ChannelViewScreen extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        finish();
+
+        if(rvListVideoContainer.getVisibility() == View.VISIBLE){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    rvListVideoContainer.clearAnimation();
+                    rvListVideoContainer.animate()
+                            .translationY(0)
+                            .alpha(0.0f)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                    rvListVideoContainer.setVisibility(View.GONE);
+                                }
+                            });
+                }
+            });
+        }else{
+            super.onBackPressed();
+            finish();
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        int maxLength = masterList.size();
+        switch (keyCode){
+            case 19:
+                itemOnSelect = true;
+                tapped = true;
+                showNavigationItem();
+                if(ListChanelAdapter.selectedPosition - 1 >= 0){
+                    ListChanelAdapter.selectedPosition  = ListChanelAdapter.selectedPosition - 1;
+                    ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 20:
+
+                itemOnSelect = true;
+                tapped = true;
+                showNavigationItem();
+
+                if(ListChanelAdapter.selectedPosition + 1 < maxLength){
+                    ListChanelAdapter.selectedPosition  = ListChanelAdapter.selectedPosition + 1;
+                    ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                    adapter.notifyDataSetChanged();
+                }
+                break;
+            case 23:
+                CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                playVideo(item.getItem2(),item.getItem3());
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

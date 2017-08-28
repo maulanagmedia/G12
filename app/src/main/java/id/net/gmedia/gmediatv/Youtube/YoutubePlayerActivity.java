@@ -9,6 +9,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -398,5 +399,39 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
         } else{
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+
+        switch (keyCode){
+            case 19:
+
+                if(YoutubeListAdapter.position - 1 >= 0){
+
+                    YoutubeListAdapter.position = YoutubeListAdapter.position - 1;
+                    rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
+                    rvYoutube.getAdapter().notifyDataSetChanged();
+                }
+                break;
+            case 20:
+
+                if(YoutubeListAdapter.position + 1 < rvYoutube.getAdapter().getItemCount()){
+
+                    YoutubeListAdapter.position = YoutubeListAdapter.position + 1;
+                    rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
+                    rvYoutube.getAdapter().notifyDataSetChanged();
+                }else{
+                    pbLoading.setVisibility(View.VISIBLE);
+                    getMoreVideos();
+                }
+                break;
+            case 23:
+                CustomItem cli = masterList.get(YoutubeListAdapter.position);
+                playVideo(cli.getItem1(), YoutubeListAdapter.position);
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

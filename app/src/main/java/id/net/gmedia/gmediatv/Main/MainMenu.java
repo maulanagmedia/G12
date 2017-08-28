@@ -5,6 +5,7 @@ import android.media.Image;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -20,6 +21,7 @@ public class MainMenu extends AppCompatActivity {
     private boolean doubleBackToExitPressedOnce = false, exitState = false;
     private LinearLayout llTV, llYoutube;
     private ImageView ivTV, ivYoutube;
+    private static int selectedChoise = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,10 @@ public class MainMenu extends AppCompatActivity {
         llYoutube = (LinearLayout) findViewById(R.id.ll_yt);
         ivTV = (ImageView) findViewById(R.id.iv_tv);
         ivYoutube = (ImageView) findViewById(R.id.iv_yt);
+
+        selectedChoise = 0;
+        ivYoutube.setHovered(true);
+        ivYoutube.setHovered(false);
 
         initEvent();
     }
@@ -94,5 +100,35 @@ public class MainMenu extends AppCompatActivity {
                 doubleBackToExitPressedOnce=false;
             }
         }, 2000);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode){
+            case 21:
+                selectedChoise = 0;
+                ivTV.setHovered(true);
+                ivYoutube.setHovered(false);
+                break;
+            case 22:
+                selectedChoise = 1;
+                ivYoutube.setHovered(true);
+                ivTV.setHovered(false);
+                break;
+            case 23:
+                goToSelectedChoise();
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void goToSelectedChoise(){
+
+        if(selectedChoise == 0){
+
+            ivTV.performClick();
+        }else{
+            ivYoutube.performClick();
+        }
     }
 }
