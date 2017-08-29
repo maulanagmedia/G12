@@ -271,6 +271,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
                             if(i == 0) {
                                 playVideo(id, i);
                                 YoutubeListAdapter.position = 0;
+                                lastPosition = 0;
                             }
                             masterList.add(new CustomItem(id, title, thumbnail));
                         }
@@ -670,7 +671,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
                 }else{
                     edtSearch.setSelected(false);
                     edtSearch.setHovered(false);
-                    return super.onKeyDown(keyCode, event);
+                    break;
                 }
         }
         return super.onKeyDown(keyCode, event);
@@ -682,8 +683,12 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
 
             edtSearch.setSelected(false);
             edtSearch.setHovered(false);
-            edtSearch.onActionViewCollapsed();
-            tvSearch.setVisibility(View.VISIBLE);
+            edtSearch.clearFocus();
+            rvYoutube.requestFocus();
+            rvYoutube.setSelected(true);
+            rvYoutube.setHovered(true);
+            //edtSearch.onActionViewCollapsed();
+            //tvSearch.setVisibility(View.VISIBLE);
         }else{
 
             edtSearch.requestFocus();
@@ -697,7 +702,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
         ypYoutube.clearFocus();
         ypYoutube.setHovered(false);
         ypYoutube.setSelected(false);
-        ypYoutube.setOnKeyListener(null);
-        ypYoutube.setFocusableInTouchMode(false);
+        //ypYoutube.setOnKeyListener(null);
+        //ypYoutube.setFocusableInTouchMode(false);
     }
 }
