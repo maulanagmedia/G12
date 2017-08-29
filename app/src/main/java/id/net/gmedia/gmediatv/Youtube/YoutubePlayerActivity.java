@@ -3,7 +3,9 @@ package id.net.gmedia.gmediatv.Youtube;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.MatrixCursor;
 import android.os.Bundle;
+import android.provider.BaseColumns;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -11,10 +13,13 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.CursorAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,13 +59,17 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
     private SearchView edtSearch;
     private TextView tvSearch;
     private static RecyclerView rvYoutube;
-    private List<CustomItem> masterList;
+    private static List<CustomItem> masterList;
     private String nextPageToken = "", maxLengthList = "10", keyword = "";
     private final String TAG = "TEST";
     private ProgressBar pbLoading;
     private static boolean potraitMode = true;
     private CarouselLayoutManager layoutManager;
     private RelativeLayout rvSearchView;
+    private SimpleCursorAdapter mAdapter;
+    private List<String> suggestion = new ArrayList<>();
+    private static boolean isOnListCusor;
+    private static int lastPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +78,9 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
         setContentView(R.layout.activity_youtube_player);
+
+        isOnListCusor = true;
+        lastPosition = 0;
 
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             potraitMode = true;
@@ -88,6 +100,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
         tvSearch = (TextView) findViewById(R.id.tv_search);
         rvYoutube = (RecyclerView) findViewById(R.id.rv_youtube);
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
+        masterList = new ArrayList<>();
 
         tvSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,9 +128,17 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
         edtSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                keyword = query;
-                nextPageToken = "";
-                getListData();
+
+                if(!query.equals("")){
+
+                    keyword = query;
+                    nextPageToken = "";
+                    lastPosition = 0;
+                    getListData();
+                    isSearchCollapse(true);
+                    return true;
+                }
+
                 return false;
             }
 
@@ -127,8 +148,100 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
             }
         });
 
+        edtSearch.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+
+                populateAdapter(s);
+                if(s.length() > 2){
+                    keyword = s;
+                    nextPageToken = "";
+                    getListData();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        setSearchEvent();
         getListData();
 
+    }
+
+    private void setSearchEvent(){
+
+        String[] from = new String[] {"search"};
+        int[] to = new int[] {android.R.id.text1};
+        mAdapter = new SimpleCursorAdapter(YoutubePlayerActivity.this,
+                android.R.layout.simple_list_item_1,
+                null,
+                from,
+                to,
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+
+        edtSearch.setSuggestionsAdapter(mAdapter);
+
+        edtSearch.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int i) {
+
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int i) {
+
+                if(suggestion.get(i).length() >0){
+
+                    edtSearch.setQuery(suggestion.get(i), true);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        /*edtSearch.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View view, int i, KeyEvent keyEvent) {
+
+                if(i == 4){
+                    InputMethodManager imm = (InputMethodManager) YoutubePlayerActivity.this
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    if(imm.isAcceptingText()){
+                        imm.hideSoftInputFromWindow( view.getWindowToken(), 0);
+
+                        if(!isOnListCusor){
+                            YoutubeListAdapter.position = lastPosition;
+                            rvYoutube.getAdapter().notifyDataSetChanged();
+                            isOnListCusor = true;
+                        }
+
+                        return true;
+                    }else{
+                        edtSearch.setSelected(false);
+                        edtSearch.setHovered(false);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });*/
+
+    }
+
+    private void populateAdapter(String query) {
+        final MatrixCursor c = new MatrixCursor(new String[]{ BaseColumns._ID, "search" });
+        for (int i=0; i< suggestion.size(); i++) {
+            if (suggestion.get(i).toLowerCase().contains(query.toLowerCase()))
+                c.addRow(new Object[] {i, suggestion.get(i)});
+        }
+        mAdapter.changeCursor(c);
     }
 
     private void getListData(){
@@ -143,6 +256,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
                     nextPageToken = apiResponse.getString("nextPageToken");
 
                     JSONArray jsonArray = apiResponse.getJSONArray("items");
+                    suggestion = new ArrayList<>();
 
                     if(jsonArray.length() > 0){
 
@@ -153,8 +267,11 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
                             id = jo.getJSONObject("id").getString("videoId");
                             title = jo.getJSONObject("snippet").getString("title");
                             thumbnail = jo.getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("default").getString("url");
-
-                            if(i == 0) playVideo(id, i);
+                            suggestion.add(jo.getJSONObject("snippet").getString("title"));
+                            if(i == 0) {
+                                playVideo(id, i);
+                                YoutubeListAdapter.position = 0;
+                            }
                             masterList.add(new CustomItem(id, title, thumbnail));
                         }
                     }
@@ -196,6 +313,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
                             title = jo.getJSONObject("snippet").getString("title");
                             thumbnail = jo.getJSONObject("snippet").getJSONObject("thumbnails").getJSONObject("default").getString("url");
                             listToAdd.add(new CustomItem(id, title, thumbnail));
+                            suggestion.add(jo.getJSONObject("snippet").getString("title"));
                         }
 
                         YoutubeListAdapter adapter = (YoutubeListAdapter) rvYoutube.getAdapter();
@@ -243,7 +361,7 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
 
                 layoutManager = new CarouselLayoutManager(CarouselLayoutManager.VERTICAL);
                 rvYoutube.setLayoutManager(layoutManager);
-                rvYoutube.setHasFixedSize(true);
+                rvYoutube.setHasFixedSize(false);
                 rvYoutube.setAdapter(menuAdapter);
 
                 rvYoutube.addOnScrollListener(new CenterScrollListener());
@@ -287,9 +405,50 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
     }
 
     public static void playVideo(String id, int position){
+
         try {
+
             player.loadVideo(id);
             rvYoutube.smoothScrollToPosition(position);
+
+            player.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+                @Override
+                public void onLoading() {
+
+                }
+
+                @Override
+                public void onLoaded(String s) {
+
+                }
+
+                @Override
+                public void onAdStarted() {
+
+                }
+
+                @Override
+                public void onVideoStarted() {
+
+                }
+
+                @Override
+                public void onVideoEnded() {
+                    if(YoutubeListAdapter.position + 1 < masterList.size()){
+                        YoutubeListAdapter.position += 1;
+                    }else{
+                        YoutubeListAdapter.position = 0;
+                    }
+                    CustomItem cli = masterList.get(YoutubeListAdapter.position);
+                    playVideo(cli.getItem1(), YoutubeListAdapter.position);
+                }
+
+                @Override
+                public void onError(YouTubePlayer.ErrorReason errorReason) {
+
+                }
+            });
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -404,34 +563,141 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-
         switch (keyCode){
             case 19:
 
-                if(YoutubeListAdapter.position - 1 >= 0){
+                disableYoutubeSelection();
+                if(isOnListCusor){
 
-                    YoutubeListAdapter.position = YoutubeListAdapter.position - 1;
-                    rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
-                    rvYoutube.getAdapter().notifyDataSetChanged();
+                    isSearchCollapse(true);
+                    if(YoutubeListAdapter.position - 1 >= 0){
+
+                        YoutubeListAdapter.position = YoutubeListAdapter.position - 1;
+                        rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
+                        rvYoutube.getAdapter().notifyDataSetChanged();
+                    }
+                }else{
+
+                    isSearchCollapse(false);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                 }
-                break;
+                return true;
             case 20:
 
-                if(YoutubeListAdapter.position + 1 < rvYoutube.getAdapter().getItemCount()){
+                disableYoutubeSelection();
+                if(isOnListCusor){
+                    isSearchCollapse(true);
+                    if(YoutubeListAdapter.position + 1 < rvYoutube.getAdapter().getItemCount()){
 
-                    YoutubeListAdapter.position = YoutubeListAdapter.position + 1;
-                    rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
+                        YoutubeListAdapter.position = YoutubeListAdapter.position + 1;
+                        rvYoutube.smoothScrollToPosition(YoutubeListAdapter.position);
+                        rvYoutube.getAdapter().notifyDataSetChanged();
+                    }else{
+                        pbLoading.setVisibility(View.VISIBLE);
+                        getMoreVideos();
+                    }
+                }
+                return true;
+            case 23:
+
+                disableYoutubeSelection();
+                isSearchCollapse(true);
+                if(isOnListCusor){
+                    CustomItem cli = masterList.get(YoutubeListAdapter.position);
+                    playVideo(cli.getItem1(), YoutubeListAdapter.position);
+                    isOnListCusor = false;
+                    lastPosition = YoutubeListAdapter.position;
+                    YoutubeListAdapter.position = -1;
                     rvYoutube.getAdapter().notifyDataSetChanged();
                 }else{
-                    pbLoading.setVisibility(View.VISIBLE);
-                    getMoreVideos();
+
+                    if(fullScreen){
+
+                        player.setFullscreen(false);
+                        fullScreen = false;
+
+                        if(!isOnListCusor){
+                            YoutubeListAdapter.position = lastPosition;
+                            rvYoutube.getAdapter().notifyDataSetChanged();
+                            isOnListCusor = true;
+                        }
+                    }else{
+                        player.setFullscreen(true);
+                        fullScreen = true;
+                    }
                 }
-                break;
-            case 23:
-                CustomItem cli = masterList.get(YoutubeListAdapter.position);
-                playVideo(cli.getItem1(), YoutubeListAdapter.position);
-                break;
+                return true;
+            case 21:
+
+                disableYoutubeSelection();
+                if(fullScreen){
+                    player.setFullscreen(false);
+                    fullScreen = false;
+                }else{
+                    isSearchCollapse(false);
+                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+                }
+                return true;
+            case 22:
+
+                disableYoutubeSelection();
+                if(!isOnListCusor){
+
+                    YoutubeListAdapter.position =  lastPosition;
+                    rvYoutube.getAdapter().notifyDataSetChanged();
+                    isOnListCusor = true;
+                }
+                return true;
+            case 4: //back
+
+                disableYoutubeSelection();
+                InputMethodManager imm = (InputMethodManager) YoutubePlayerActivity.this
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                if(imm.isAcceptingText()){
+                    View view = this.getCurrentFocus();
+                    imm.hideSoftInputFromWindow( view.getWindowToken(), 0);
+
+                    if(!isOnListCusor){
+                        YoutubeListAdapter.position = lastPosition;
+                        rvYoutube.getAdapter().notifyDataSetChanged();
+                        isOnListCusor = true;
+                    }
+
+                    return true;
+                }else{
+                    edtSearch.setSelected(false);
+                    edtSearch.setHovered(false);
+                    return super.onKeyDown(keyCode, event);
+                }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void isSearchCollapse(boolean condition){
+
+        if(condition){
+
+            edtSearch.setSelected(false);
+            edtSearch.setHovered(false);
+            edtSearch.onActionViewCollapsed();
+            tvSearch.setVisibility(View.VISIBLE);
+        }else{
+
+            edtSearch.requestFocus();
+            tvSearch.setVisibility(View.GONE);
+            edtSearch.onActionViewExpanded();
+        }
+    }
+
+    private void disableYoutubeSelection(){
+
+        ypYoutube.clearFocus();
+        ypYoutube.setHovered(false);
+        ypYoutube.setSelected(false);
+        ypYoutube.setOnKeyListener(null);
+        ypYoutube.setFocusableInTouchMode(false);
     }
 }

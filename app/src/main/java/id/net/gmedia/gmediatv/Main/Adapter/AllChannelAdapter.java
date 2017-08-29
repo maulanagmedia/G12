@@ -79,7 +79,7 @@ public class AllChannelAdapter extends RecyclerView.Adapter<AllChannelAdapter.My
             holder.tvTitle1.setTextColor(context.getResources().getColor(R.color.color_white));
         }
 
-        holder.tvTitle1.setText(cli.getItem2());
+        holder.tvTitle1.setText((position + 1)+". "+ cli.getItem2());
 
         holder.rlContainer.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -82,7 +82,7 @@ public class YoutubeListAdapter extends RecyclerView.Adapter<YoutubeListAdapter.
         }*/
 
         int[] display = iv.getScreenResolution(context);
-        int height = display[1] / 3;
+        int height = display[1] / 4;
 
         LinearLayout.LayoutParams oldLayoutParams = (LinearLayout.LayoutParams) holder.cvContainer.getLayoutParams();
         LinearLayout.LayoutParams newLayoutParams = new LinearLayout.LayoutParams(oldLayoutParams.width, height);

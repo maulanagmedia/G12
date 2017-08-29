@@ -43,7 +43,7 @@ public class CarouselLayoutManager extends RecyclerView.LayoutManager implements
     public static final int VERTICAL = OrientationHelper.VERTICAL;
 
     public static final int INVALID_POSITION = -1;
-    public static final int MAX_VISIBLE_ITEMS = 2;
+    public static final int MAX_VISIBLE_ITEMS = 4;
 
     private static final boolean CIRCLE_LAYOUT = false;
 

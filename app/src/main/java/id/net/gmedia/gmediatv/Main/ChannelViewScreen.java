@@ -35,6 +35,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import id.net.gmedia.gmediatv.Main.Adapter.AllChannelAdapter;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
@@ -59,6 +61,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     private SavedChanelManager savedChanel;
     private boolean itemOnSelect = false;
     private int delayTime = 5000; // Delay before hide the view
+    private int channelTime = 2000; // Delay before hide the view
     private ImageView ivUp, ivDown;
     private int invervalHolding = 500;
     private int intervalMove = 200;
@@ -91,12 +94,17 @@ public class ChannelViewScreen extends AppCompatActivity {
     };
     private ProgressBar pbLoading;
     private LinearLayout llYoutubeContainer;
+    private static boolean isTypeChannel;
+    private LinearLayout llChannelSelector;
+    private TextView tvChannelSelector;
+    private Timer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_view_screen);
 
+        isTypeChannel = false;
         savedChanel = new SavedChanelManager(ChannelViewScreen.this);
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
@@ -120,6 +128,8 @@ public class ChannelViewScreen extends AppCompatActivity {
         ivUp = (ImageView) findViewById(R.id.iv_up);
         ivDown = (ImageView) findViewById(R.id.iv_down);
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
+        llChannelSelector = (LinearLayout) findViewById(R.id.ll_channel_selector);
+        tvChannelSelector = (TextView) findViewById(R.id.tv_channel_selector);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sbVolume.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
@@ -541,9 +551,12 @@ public class ChannelViewScreen extends AppCompatActivity {
                 tapped = true;
                 showNavigationItem();
                 if(ListChanelAdapter.selectedPosition - 1 >= 0){
-                    ListChanelAdapter.selectedPosition  = ListChanelAdapter.selectedPosition - 1;
+                    ListChanelAdapter.selectedPosition = ListChanelAdapter.selectedPosition - 1;
                     ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
                     adapter.notifyDataSetChanged();
+                    lvChanel.setSelection(ListChanelAdapter.selectedPosition);
+                    CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                    playVideo(item.getItem2(),item.getItem3());
                 }
                 break;
             case 20:
@@ -556,13 +569,136 @@ public class ChannelViewScreen extends AppCompatActivity {
                     ListChanelAdapter.selectedPosition  = ListChanelAdapter.selectedPosition + 1;
                     ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
                     adapter.notifyDataSetChanged();
+                    lvChanel.setSelection(ListChanelAdapter.selectedPosition);
+                    CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                    playVideo(item.getItem2(),item.getItem3());
                 }
                 break;
             case 23:
-                CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
-                playVideo(item.getItem2(),item.getItem3());
+                if(vvPlayVideo.getVisibility() == View.GONE){
+                    /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                    playVideo(item.getItem2(),item.getItem3());*/
+                    itemOnSelect = true;
+                    showNavigationItem();
+                }
+
+                break;
+            case 7:
+                selectChannel("0");
+                break;
+            case 8:
+                selectChannel("1");
+                break;
+            case 9:
+                selectChannel("2");
+                break;
+            case 10:
+                selectChannel("3");
+                break;
+            case 11:
+                selectChannel("4");
+                break;
+            case 12:
+                selectChannel("5");
+                break;
+            case 13:
+                selectChannel("6");
+                break;
+            case 14:
+                selectChannel("7");
+                break;
+            case 15:
+                selectChannel("8");
+                break;
+            case 16:
+                selectChannel("9");
                 break;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void selectChannel(final String number){
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if(tvChannelSelector.getText().length() < 4){
+                    isTypeChannel = true;
+                    itemOnSelect = true;
+                    showNavigationItem();
+                    tvChannelSelector.setText(tvChannelSelector.getText().toString()+number);
+                    if(llChannelSelector.getVisibility() == View.GONE){
+                        llChannelSelector.setVisibility(View.VISIBLE);
+                        llChannelSelector.animate()
+                                .translationY(0)
+                                .alpha(1.0f)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                    }
+                                });
+                    }
+                    if(number.equals("") && tvChannelSelector.getText().length() == 1) isTypeChannel = false;
+                }else{
+                    isTypeChannel = false;
+                }
+            }
+        });
+
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+
+                if(isTypeChannel){
+
+                    isTypeChannel = false;
+                    if(tvChannelSelector.getText().length() == 1){
+                        selectChannel("");
+                    }
+                }else {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if(iv.parseNullInteger(tvChannelSelector.getText().toString()) >= 0 && iv.parseNullInteger(tvChannelSelector.getText().toString())< masterList.size()){
+                                ListChanelAdapter.selectedPosition = iv.parseNullInteger(tvChannelSelector.getText().toString()) - 1;
+                                ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                                adapter.notifyDataSetChanged();
+                                lvChanel.smoothScrollToPosition(ListChanelAdapter.selectedPosition);
+                                CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                                playVideo(item.getItem2(),item.getItem3());
+
+
+                            }else{
+
+                                Toast.makeText(ChannelViewScreen.this, "Channel tidak tersedia", Toast.LENGTH_SHORT).show();
+                            }
+
+                            llChannelSelector.clearAnimation();
+                            llChannelSelector.animate()
+                                    .translationY(0)
+                                    .alpha(0.0f)
+                                    .setListener(new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            super.onAnimationEnd(animation);
+                                            llChannelSelector.setVisibility(View.GONE);
+                                            tvChannelSelector.setText("");
+                                        }
+                                    });
+                            onBackPressed();
+                        }
+                    });
+
+                }
+            }
+
+        }, channelTime);
     }
 }

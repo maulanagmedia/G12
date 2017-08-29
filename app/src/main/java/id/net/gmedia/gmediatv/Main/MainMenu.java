@@ -18,7 +18,8 @@ import id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity;
 
 public class MainMenu extends AppCompatActivity {
 
-    private boolean doubleBackToExitPressedOnce = false, exitState = false;
+    private static boolean doubleBackToExitPressedOnce;
+    private boolean exitState = false;
     private LinearLayout llTV, llYoutube;
     private ImageView ivTV, ivYoutube;
     private static int selectedChoise = 0;
@@ -28,6 +29,7 @@ public class MainMenu extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+        doubleBackToExitPressedOnce = false;
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
 
@@ -48,7 +50,7 @@ public class MainMenu extends AppCompatActivity {
         ivYoutube = (ImageView) findViewById(R.id.iv_yt);
 
         selectedChoise = 0;
-        ivYoutube.setHovered(true);
+        ivTV.setHovered(true);
         ivYoutube.setHovered(false);
 
         initEvent();
@@ -81,7 +83,6 @@ public class MainMenu extends AppCompatActivity {
     public void onBackPressed() {
 
         if (doubleBackToExitPressedOnce) {
-
             Intent intent = new Intent(MainMenu.this, MainMenu.class);
             intent.putExtra("exit", true);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -89,7 +90,7 @@ public class MainMenu extends AppCompatActivity {
             //System.exit(0);
         }
 
-        if(!exitState){
+        if(!exitState && !doubleBackToExitPressedOnce){
             this.doubleBackToExitPressedOnce = true;
             Toast.makeText(this, getResources().getString(R.string.app_exit), Toast.LENGTH_SHORT).show();
         }

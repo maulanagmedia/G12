@@ -36,7 +36,7 @@ public class ListChanelAdapter extends ArrayAdapter{
     public static int selectedPosition = 0;
 
     public ListChanelAdapter(Activity context, List<CustomItem> items) {
-        super(context, R.layout.cv_list_chanel, items);
+        super(context, R.layout.cv_list_all_chanel, items);
         this.context = context;
         this.items = items;
     }
@@ -54,7 +54,7 @@ public class ListChanelAdapter extends ArrayAdapter{
 
         if(convertView == null){
             LayoutInflater inflater = context.getLayoutInflater();
-            convertView = inflater.inflate(R.layout.cv_list_chanel, null);
+            convertView = inflater.inflate(R.layout.cv_list_all_chanel, null);
             holder.rlContainer = (RelativeLayout) convertView.findViewById(R.id.rl_container);
             holder.tvTitle1 = (TextView) convertView.findViewById(R.id.tv_title_1);
             holder.ivPlay = (ImageView) convertView.findViewById(R.id.iv_play);
