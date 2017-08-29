@@ -119,6 +119,7 @@ public class ChanelList extends AppCompatActivity {
                     AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition - 4;
                     AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
                     adapter.notifyDataSetChanged();
+                    rvChanggelList.smoothScrollToPosition(AllChannelAdapter.selectedPosition);
                 }
                 break;
             case 20:
@@ -126,6 +127,7 @@ public class ChanelList extends AppCompatActivity {
                     AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition + 4;
                     AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
                     adapter.notifyDataSetChanged();
+                    rvChanggelList.smoothScrollToPosition(AllChannelAdapter.selectedPosition);
                 }
                 break;
             case 22:
@@ -133,6 +135,7 @@ public class ChanelList extends AppCompatActivity {
                     AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition + 1;
                     AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
                     adapter.notifyDataSetChanged();
+                    rvChanggelList.smoothScrollToPosition(AllChannelAdapter.selectedPosition);
                 }
                 break;
             case 21:
@@ -140,6 +143,7 @@ public class ChanelList extends AppCompatActivity {
                     AllChannelAdapter.selectedPosition = AllChannelAdapter.selectedPosition - 1;
                     AllChannelAdapter adapter = (AllChannelAdapter) rvChanggelList.getAdapter();
                     adapter.notifyDataSetChanged();
+                    rvChanggelList.smoothScrollToPosition(AllChannelAdapter.selectedPosition);
                 }
                 break;
             case 23:

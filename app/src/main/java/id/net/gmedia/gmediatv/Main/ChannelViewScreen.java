@@ -574,11 +574,14 @@ public class ChannelViewScreen extends AppCompatActivity {
                     playVideo(item.getItem2(),item.getItem3());
                 }
                 break;
-            case 23:
-                if(vvPlayVideo.getVisibility() == View.GONE){
+            case 23: // OK
+                if(rvListVideoContainer.getVisibility() == View.GONE){
                     /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
                     playVideo(item.getItem2(),item.getItem3());*/
                     itemOnSelect = true;
+                    showNavigationItem();
+                }else{
+                    itemOnSelect = false;
                     showNavigationItem();
                 }
 
