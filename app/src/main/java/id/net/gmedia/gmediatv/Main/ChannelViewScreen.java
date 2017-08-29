@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,13 +42,14 @@ import java.util.TimerTask;
 import id.net.gmedia.gmediatv.Main.Adapter.AllChannelAdapter;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
+import id.net.gmedia.gmediatv.Utils.CustomVideoView;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 import id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity;
 
 public class ChannelViewScreen extends AppCompatActivity {
 
-    private static VideoView vvPlayVideo;
+    private static CustomVideoView vvPlayVideo;
     private ItemValidation iv = new ItemValidation();
     private boolean showNavigator = false;
     private TextView tvVolume;
@@ -61,7 +63,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     private SavedChanelManager savedChanel;
     private boolean itemOnSelect = false;
     private int delayTime = 5000; // Delay before hide the view
-    private int channelTime = 2000; // Delay before hide the view
+    private int channelTime = 1600; // Delay before hide the view
     private ImageView ivUp, ivDown;
     private int invervalHolding = 500;
     private int intervalMove = 200;
@@ -121,7 +123,7 @@ public class ChannelViewScreen extends AppCompatActivity {
 
         tvVolume = (TextView) findViewById(R.id.tv_volume);
         sbVolume = (SeekBar) findViewById(R.id.sb_volume);
-        vvPlayVideo = (VideoView) findViewById(R.id.vv_stream);
+        vvPlayVideo = (CustomVideoView) findViewById(R.id.vv_stream);
         llYoutubeContainer = (LinearLayout) findViewById(R.id.ll_youtube_container);
         lvChanel = (ListView) findViewById(R.id.lv_chanel);
         rvListVideoContainer = (RelativeLayout) findViewById(R.id.rl_list_chanel);
@@ -485,12 +487,15 @@ public class ChannelViewScreen extends AppCompatActivity {
 
                 pbLoading.setVisibility(View.GONE);
                 mp.start();
+
+                fullScreenVideo();
                 mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
 
                     @Override
                     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
 
                         mp.start();
+                        fullScreenVideo();
                     }
                 });
             }
@@ -512,6 +517,17 @@ public class ChannelViewScreen extends AppCompatActivity {
                 return true;
             }
         });
+    }
+
+    private void fullScreenVideo()
+    {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) vvPlayVideo.getLayoutParams();
+        params.width =  metrics.widthPixels;
+        params.height = metrics.heightPixels;
+        params.leftMargin = 0;
+        vvPlayVideo.setLayoutParams(params);
     }
 
     @Override

@@ -435,11 +435,16 @@ public class YoutubePlayerActivity extends YouTubeBaseActivity implements YouTub
 
                 @Override
                 public void onVideoEnded() {
+                    if(YoutubeListAdapter.position == -1){
+                        YoutubeListAdapter.position = lastPosition;
+                    }
+
                     if(YoutubeListAdapter.position + 1 < masterList.size()){
                         YoutubeListAdapter.position += 1;
                     }else{
                         YoutubeListAdapter.position = 0;
                     }
+
                     CustomItem cli = masterList.get(YoutubeListAdapter.position);
                     playVideo(cli.getItem1(), YoutubeListAdapter.position);
                 }

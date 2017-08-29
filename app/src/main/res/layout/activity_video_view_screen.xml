@@ -6,10 +6,13 @@
     android:layout_height="match_parent"
     tools:context="id.net.gmedia.gmediatv.Main.ChannelViewScreen">
 
-    <VideoView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerInParent="true"
+    <id.net.gmedia.gmediatv.Utils.CustomVideoView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
         android:id="@+id/vv_stream" />
 
     <LinearLayout
@@ -96,11 +99,11 @@
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:id="@+id/tv_channel_selector"
-                    android:textSize="22sp"
+                    android:textSize="25sp"
                     android:shadowColor="@color/color_black"
-                    android:shadowDx="1"
-                    android:shadowDy="1"
-                    android:shadowRadius="2"
+                    android:shadowDx="2"
+                    android:shadowDy="2"
+                    android:shadowRadius="4"
                     android:textStyle="bold"
                     android:textColor="@color/color_white"/>
             </LinearLayout>
