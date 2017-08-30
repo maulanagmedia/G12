@@ -91,7 +91,7 @@
             android:weightSum="1"
             android:gravity="center"
             android:id="@+id/ll_youtube_container"
-            android:background="@drawable/ripple_button_youtube"
+            android:background="@drawable/background_radian_black"
             android:orientation="horizontal">
 
             <ImageView

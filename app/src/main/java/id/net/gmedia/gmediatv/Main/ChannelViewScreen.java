@@ -24,9 +24,9 @@ import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.maulana.custommodul.ApiVolley;
+import com.maulana.custommodul.ApkInstaller;
 import com.maulana.custommodul.CustomItem;
 import com.maulana.custommodul.ItemValidation;
 
@@ -39,13 +39,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import id.net.gmedia.gmediatv.Main.Adapter.AllChannelAdapter;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.Utils.CustomVideoView;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
-import id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity;
 
 public class ChannelViewScreen extends AppCompatActivity {
 
@@ -100,6 +98,8 @@ public class ChannelViewScreen extends AppCompatActivity {
     private LinearLayout llChannelSelector;
     private TextView tvChannelSelector;
     private Timer timer;
+    private boolean buttonOnYoutube = false;
+    private static int lastPositionChannel = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -177,8 +177,10 @@ public class ChannelViewScreen extends AppCompatActivity {
         llYoutubeContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(ChannelViewScreen.this, YoutubePlayerActivity.class);
-                startActivity(intent);
+
+                redirrectToYoutube();
+                /*Intent intent = new Intent(ChannelViewScreen.this, YoutubePlayerActivity.class);
+                startActivity(intent);*/
             }
         });
 
@@ -246,7 +248,19 @@ public class ChannelViewScreen extends AppCompatActivity {
         });
     }
 
+    private void redirrectToYoutube(){
 
+        try {
+
+            Intent i = getPackageManager().getLaunchIntentForPackage(ServerURL.pnYoutube);
+            startActivity(i);
+        } catch (Exception e) {
+
+            ApkInstaller atualizaApp = new ApkInstaller();
+            atualizaApp.setContext(ChannelViewScreen.this);
+            atualizaApp.execute(ServerURL.bwYoutubeForTV);
+        }
+    }
 
     private void scrollListViewToUp() {
         if(lvChanel.getAdapter() != null){
@@ -566,14 +580,46 @@ public class ChannelViewScreen extends AppCompatActivity {
                 itemOnSelect = true;
                 tapped = true;
                 showNavigationItem();
-                if(ListChanelAdapter.selectedPosition - 1 >= 0){
-                    ListChanelAdapter.selectedPosition = ListChanelAdapter.selectedPosition - 1;
+
+                if(!buttonOnYoutube){
+
+                    if(ListChanelAdapter.selectedPosition - 1 >= 0){
+
+                        ListChanelAdapter.selectedPosition = ListChanelAdapter.selectedPosition - 1;
+                        lastPositionChannel = ListChanelAdapter.selectedPosition;
+                        ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                        adapter.notifyDataSetChanged();
+                        //lvChanel.setSelection(ListChanelAdapter.selectedPosition);
+                        ensureVisible(lvChanel, ListChanelAdapter.selectedPosition);
+                        /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                        playVideo(item.getItem2(),item.getItem3());*/
+                        llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_black));
+                        buttonOnYoutube = false;
+                    }else{
+
+                        ListChanelAdapter.selectedPosition  = -1;
+                        ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                        adapter.notifyDataSetChanged();
+
+                        llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_red));
+                        buttonOnYoutube = true;
+                    }
+
+                }else{
+
+                    llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_black));
+                    buttonOnYoutube = false;
+
+                    lastPositionChannel = masterList.size() - 1;
+                    // Play Last Video
+                    ListChanelAdapter.selectedPosition  = lastPositionChannel;
                     ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
                     adapter.notifyDataSetChanged();
-                    lvChanel.setSelection(ListChanelAdapter.selectedPosition);
-                    CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
-                    playVideo(item.getItem2(),item.getItem3());
+                    ensureVisible(lvChanel, ListChanelAdapter.selectedPosition);
+                    /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                    playVideo(item.getItem2(),item.getItem3());*/
                 }
+
                 break;
             case 20:
 
@@ -585,20 +631,44 @@ public class ChannelViewScreen extends AppCompatActivity {
                     ListChanelAdapter.selectedPosition  = ListChanelAdapter.selectedPosition + 1;
                     ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
                     adapter.notifyDataSetChanged();
-                    lvChanel.setSelection(ListChanelAdapter.selectedPosition);
-                    CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
-                    playVideo(item.getItem2(),item.getItem3());
+                    //lvChanel.setSelection(ListChanelAdapter.selectedPosition);
+                    ensureVisible(lvChanel, ListChanelAdapter.selectedPosition);
+                    /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                    playVideo(item.getItem2(),item.getItem3());*/
+                    buttonOnYoutube = false;
+                    lastPositionChannel = ListChanelAdapter.selectedPosition;
+
+                    llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_black));
+                    buttonOnYoutube = false;
+                }else{
+
+                    ListChanelAdapter.selectedPosition  = -1;
+                    ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                    adapter.notifyDataSetChanged();
+
+                    llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_red));
+                    buttonOnYoutube = true;
                 }
                 break;
             case 23: // OK
-                if(rvListVideoContainer.getVisibility() == View.GONE){
+
+                if(buttonOnYoutube){
+
+                    redirrectToYoutube();
+                }else{
+
+                    if(rvListVideoContainer.getVisibility() == View.GONE){
                     /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
                     playVideo(item.getItem2(),item.getItem3());*/
-                    itemOnSelect = true;
-                    showNavigationItem();
-                }else{
-                    itemOnSelect = false;
-                    showNavigationItem();
+                        itemOnSelect = true;
+                        showNavigationItem();
+                    }else{
+
+                        CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                        playVideo(item.getItem2(),item.getItem3());
+                        itemOnSelect = false;
+                        showNavigationItem();
+                    }
                 }
 
                 break;
@@ -719,5 +789,33 @@ public class ChannelViewScreen extends AppCompatActivity {
             }
 
         }, channelTime);
+    }
+
+    private void ensureVisible(ListView listView, int pos)
+    {
+        if (listView == null)
+        {
+            return;
+        }
+
+        if(pos < 0 || pos >= listView.getCount())
+        {
+            return;
+        }
+
+        int first = listView.getFirstVisiblePosition();
+        int last = listView.getLastVisiblePosition();
+
+        if (pos < first)
+        {
+            listView.setSelection(pos);
+            return;
+        }
+
+        if (pos >= last)
+        {
+            listView.setSelection(1 + pos - (last - first));
+            return;
+        }
     }
 }
