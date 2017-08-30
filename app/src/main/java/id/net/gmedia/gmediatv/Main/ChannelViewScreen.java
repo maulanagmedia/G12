@@ -560,7 +560,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        int maxLength = masterList.size();
+        int maxLength = (masterList == null) ? 0 : masterList.size();
         switch (keyCode){
             case 19:
                 itemOnSelect = true;
@@ -685,7 +685,7 @@ public class ChannelViewScreen extends AppCompatActivity {
                         @Override
                         public void run() {
 
-                            if(iv.parseNullInteger(tvChannelSelector.getText().toString()) >= 0 && iv.parseNullInteger(tvChannelSelector.getText().toString())< masterList.size()){
+                            if(iv.parseNullInteger(tvChannelSelector.getText().toString()) > 0 && iv.parseNullInteger(tvChannelSelector.getText().toString())< masterList.size()){
                                 ListChanelAdapter.selectedPosition = iv.parseNullInteger(tvChannelSelector.getText().toString()) - 1;
                                 ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
                                 adapter.notifyDataSetChanged();
