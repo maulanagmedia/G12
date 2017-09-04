@@ -27,6 +27,7 @@ public class ServerURL {
     public static String bwYoutubeForTV = baseUrl + "apk/"+pnYoutube+".apk";
     //Netflix
     public static String pnNetflix = "com.netflix.mediaclient";
+    //public static String pnNetflix = "com.netflix.ninja";
     public static String bwNetflix = baseUrl + "apk/"+pnNetflix+".apk";
     //Iflix
     public static String pnIflix = "iflix.play";

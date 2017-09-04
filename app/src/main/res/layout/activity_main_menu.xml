@@ -28,29 +28,23 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.5"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
+                android:orientation="horizontal"
                 android:gravity="center"
                 android:weightSum="1">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:weightSum="1">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="0.2"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"></LinearLayout>
-
-                    <LinearLayout
                         android:id="@+id/ll_tv"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.4"
+                        android:layout_weight="0.7"
                         android:orientation="vertical"
                         android:weightSum="1">
 
@@ -75,60 +69,9 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.3"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:weightSum="1">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="0.2"
-                        android:layout_height="match_parent"
-                        android:orientation="horizontal"></LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/ll_netflix"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="0.4"
-                        android:orientation="vertical"
-                        android:weightSum="1">
-                        
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="0.7"
-                            android:src="@drawable/btn_tv"
-                            android:id="@+id/iv_netflix"/>
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="0.3"
-                            android:gravity="center"
-                            android:text="Netflix"
-                            android:textSize="@dimen/title_text"
-                            android:textStyle="bold"
-                            android:textColor="@color/color_white"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="0.5"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:weightSum="1">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
                     android:weightSum="1"
                     android:gravity="center"
                     android:orientation="horizontal">
@@ -137,7 +80,7 @@
                         android:id="@+id/ll_yt"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.4"
+                        android:layout_weight="0.7"
                         android:orientation="vertical"
                         android:weightSum="1">
 
@@ -159,17 +102,58 @@
                             android:textColor="@color/color_white"/>
                     </LinearLayout>
 
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="0.5"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:weightSum="1">
+
                     <LinearLayout
+                        android:id="@+id/ll_netflix"
                         android:layout_width="0dp"
-                        android:layout_weight="0.2"
                         android:layout_height="match_parent"
-                        android:orientation="horizontal"></LinearLayout>
+                        android:layout_weight="0.7"
+                        android:orientation="vertical"
+                        android:weightSum="1">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.7"
+                            android:src="@drawable/btn_tv"
+                            android:id="@+id/iv_netflix"/>
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:layout_weight="0.3"
+                            android:gravity="center"
+                            android:text="Netflix"
+                            android:textSize="@dimen/title_text"
+                            android:textStyle="bold"
+                            android:textColor="@color/color_white"/>
+                    </LinearLayout>
+
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="0.3"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
                     android:weightSum="1"
                     android:gravity="center"
                     android:orientation="horizontal">
@@ -178,7 +162,7 @@
                         android:id="@+id/ll_iflix"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="0.4"
+                        android:layout_weight="0.7"
                         android:orientation="vertical"
                         android:weightSum="1">
 
@@ -194,7 +178,7 @@
                             android:layout_height="0dp"
                             android:layout_weight="0.3"
                             android:gravity="center"
-                            android:text="Youtube"
+                            android:text="Iflix"
                             android:textSize="@dimen/title_text"
                             android:textStyle="bold"
                             android:textColor="@color/color_white"/>
