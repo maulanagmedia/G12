@@ -37,6 +37,7 @@ import java.util.List;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
+import id.net.gmedia.gmediatv.Utils.ServiceTimerServer;
 
 public class MainMenu extends RuntimePermissionsActivity {
 
@@ -50,7 +51,6 @@ public class MainMenu extends RuntimePermissionsActivity {
     private ImageView ivNetFlix, ivIflix;
     private final String TAG = "MainMenu";
 
-
     //For remote
     private NsdManager mNsdManager;
     private ServerSocket serverSocket;
@@ -62,6 +62,7 @@ public class MainMenu extends RuntimePermissionsActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+        startService(new Intent(MainMenu.this, ServiceTimerServer.class));
         // for android > M
         if (ContextCompat.checkSelfPermission(
                 MainMenu.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
@@ -109,7 +110,6 @@ public class MainMenu extends RuntimePermissionsActivity {
         ivYoutube = (ImageView) findViewById(R.id.iv_yt);
         ivNetFlix = (ImageView) findViewById(R.id.iv_netflix);
         ivIflix = (ImageView) findViewById(R.id.iv_iflix);
-
 
         selectedChoise = 0;
         setHovered(selectedChoise);
@@ -465,12 +465,49 @@ public class MainMenu extends RuntimePermissionsActivity {
                         if (request.equals(ServiceUtils.REQUEST_CODE)) {
 
                             String clientIPAddress = jsondata.getString("ipAddress");
-                            String keyCode = jsondata.getString("keyCode");
-                            Log.d(TAG, "ip Client: " +clientIPAddress);
-                            // Add client IP to a list
-                            getAction(iv.parseNullInteger(keyCode));
-                            messageToClient = "Connection Accepted";
-                            dataOutputStream.writeUTF(messageToClient);
+                            String typeCommand = jsondata.getString("type");
+
+                            if(typeCommand.equals("request_connection")){
+
+                                if(ServiceUtils.lockedClient.equals("") || ServiceUtils.lockedClient.equals(clientIPAddress)){
+
+                                    ServiceUtils.lockedClient = clientIPAddress;
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MainMenu.this, "Connected device " + ServiceUtils.lockedClient, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                    messageToClient = "1";
+                                }else{
+                                    messageToClient = "0";
+                                }
+                                dataOutputStream.writeUTF(messageToClient);
+
+                            } else if(typeCommand.equals("clear_connection")){
+
+                                if(clientIPAddress.equals(ServiceUtils.lockedClient)){
+                                    ServiceUtils.lockedClient = "";
+                                    messageToClient = "1";
+                                }else{
+                                    messageToClient = "0";
+                                }
+                                dataOutputStream.writeUTF(messageToClient);
+                            }else{
+
+                                if(ServiceUtils.lockedClient.equals(clientIPAddress) || ServiceUtils.lockedClient.equals("")){
+                                    ServiceUtils.lockedClient = clientIPAddress;
+                                    String keyCode = jsondata.getString("keyCode");
+                                    Log.d(TAG, "ip Client: " +clientIPAddress);
+                                    // Add client IP to a list
+                                    getAction(iv.parseNullInteger(keyCode));
+                                    messageToClient = "Connection Accepted";
+                                    dataOutputStream.writeUTF(messageToClient);
+                                }else{
+                                    messageToClient = "Connection Rejected ip not registered";
+                                    dataOutputStream.writeUTF(messageToClient);
+                                }
+                            }
                         } else {
                             // There might be other queries, but as of now nothing.
                             dataOutputStream.flush();

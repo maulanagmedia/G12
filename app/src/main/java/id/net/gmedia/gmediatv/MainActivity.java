@@ -1,6 +1,7 @@
 package id.net.gmedia.gmediatv;
 
 import android.app.ProgressDialog;
+import android.app.Service;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -31,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
+
 public class MainActivity extends AppCompatActivity {
 
     private VideoView vvLoad;
@@ -57,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
         pbLoading.setVisibility(View.GONE);
 
+
+        ServiceUtils.lockedClient = "";
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
             videoPath = bundle.getString("url");
