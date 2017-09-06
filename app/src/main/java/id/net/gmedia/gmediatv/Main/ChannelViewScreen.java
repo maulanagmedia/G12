@@ -137,6 +137,12 @@ public class ChannelViewScreen extends AppCompatActivity {
         }
 
         initUI();
+
+        // For Remote access
+        //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(ServerActivity.this);
+        mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+        registerService(ServiceUtils.DEFAULT_PORT);
+        initializeReceiver();
     }
 
     private void initUI() {

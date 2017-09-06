@@ -1,6 +1,7 @@
 package id.net.gmedia.gmediatv.Main;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
@@ -63,6 +64,12 @@ public class ChanelList extends AppCompatActivity {
         setContentView(R.layout.activity_chanel_list);
 
         initUI();
+
+        // For Remote access
+        //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(ServerActivity.this);
+        mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+        registerService(ServiceUtils.DEFAULT_PORT);
+        initializeReceiver();
     }
 
     private void initUI() {

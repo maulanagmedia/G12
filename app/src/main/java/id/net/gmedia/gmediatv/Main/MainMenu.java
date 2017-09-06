@@ -14,6 +14,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.maulana.custommodul.ApkInstaller;
@@ -56,6 +57,9 @@ public class MainMenu extends RuntimePermissionsActivity {
     private ServerSocket serverSocket;
     private ItemValidation iv = new ItemValidation();
     private SocketServerThread socketServerThread;
+    private LinearLayout llInfoContainer;
+    private ImageView ivInfo;
+    private TextView tvMac;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +114,9 @@ public class MainMenu extends RuntimePermissionsActivity {
         ivYoutube = (ImageView) findViewById(R.id.iv_yt);
         ivNetFlix = (ImageView) findViewById(R.id.iv_netflix);
         ivIflix = (ImageView) findViewById(R.id.iv_iflix);
+        llInfoContainer = (LinearLayout) findViewById(R.id.ll_info_container);
+        ivInfo = (ImageView) findViewById(R.id.iv_info);
+        tvMac = (TextView) findViewById(R.id.tv_mac);
 
         selectedChoise = 0;
         setHovered(selectedChoise);

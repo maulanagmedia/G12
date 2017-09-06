@@ -37,7 +37,7 @@ public class ServiceTimerServer extends Service{
 
         private void startService()
         {
-            timer.scheduleAtFixedRate(new mainTask(), 0, 1000);
+            timer.scheduleAtFixedRate(new mainTask(), 0, timerTtime);
         }
 
         private class mainTask extends TimerTask
