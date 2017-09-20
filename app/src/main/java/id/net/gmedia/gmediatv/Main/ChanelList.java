@@ -150,7 +150,7 @@ public class ChanelList extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
-        int maxleng = masterList.size();
+        int maxleng = (masterList != null) ? masterList.size() : 0;
         switch (keyCode){
             case 19:
                 if(AllChannelAdapter.selectedPosition - 4 >= 0){
@@ -186,12 +186,14 @@ public class ChanelList extends AppCompatActivity {
                 break;
             case 23:
 
-                CustomItem item = masterList.get(AllChannelAdapter.selectedPosition);
-                Intent intent = new Intent(ChanelList.this, ChannelViewScreen.class);
-                intent.putExtra("nama", item.getItem2());
-                intent.putExtra("link", item.getItem3());
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                if(masterList != null){
+                    CustomItem item = masterList.get(AllChannelAdapter.selectedPosition);
+                    Intent intent = new Intent(ChanelList.this, ChannelViewScreen.class);
+                    intent.putExtra("nama", item.getItem2());
+                    intent.putExtra("link", item.getItem3());
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
                 break;
         }
         return super.onKeyDown(keyCode, event);

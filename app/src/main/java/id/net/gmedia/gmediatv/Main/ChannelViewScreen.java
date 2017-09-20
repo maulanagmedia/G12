@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -64,6 +65,8 @@ public class ChannelViewScreen extends AppCompatActivity {
     private static CustomVideoView vvPlayVideo;
     private ItemValidation iv = new ItemValidation();
     private boolean showNavigator = false;
+    private int timerTime = 10; // in second
+    private int timerTimeBack = 5; // in second
     private TextView tvVolume;
     private SeekBar sbVolume;
     private AudioManager audioManager;
@@ -120,6 +123,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     private ServerSocket serverSocket;
     private SocketServerThread socketServerThread;
     private final String TAG = "Chanel";
+    private RelativeLayout rvScreenContainer;
 
 
     @Override
@@ -159,6 +163,7 @@ public class ChannelViewScreen extends AppCompatActivity {
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
         llChannelSelector = (LinearLayout) findViewById(R.id.ll_channel_selector);
         tvChannelSelector = (TextView) findViewById(R.id.tv_channel_selector);
+        rvScreenContainer = (RelativeLayout) findViewById(R.id.rv_screen_container);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sbVolume.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
@@ -273,6 +278,38 @@ public class ChannelViewScreen extends AppCompatActivity {
                 return false;
             }
         });
+
+        backNormalScale(5);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setVideoCOntainerScale(1);
+                        backNormalScale(timerTimeBack);
+                    }
+                });
+            }
+        },0 , timerTime * 1000);
+    }
+
+    private void backNormalScale(int Seconds){
+
+        new CountDownTimer(Seconds* 1000+1000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                int seconds = (int) (millisUntilFinished / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+            }
+
+            public void onFinish() {
+                setVideoCOntainerScale(0.8);
+            }
+        }.start();
     }
 
     private void redirrectToYoutube(){
@@ -537,14 +574,14 @@ public class ChannelViewScreen extends AppCompatActivity {
                 pbLoading.setVisibility(View.GONE);
                 mp.start();
 
-                fullScreenVideo();
+                fullScreenVideo(1);
                 mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
 
                     @Override
                     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
 
                         mp.start();
-                        fullScreenVideo();
+                        fullScreenVideo(1);
                     }
                 });
             }
@@ -568,13 +605,71 @@ public class ChannelViewScreen extends AppCompatActivity {
         });
     }
 
-    private void fullScreenVideo()
+    private void setVideoCOntainerScale(final double scale)
+    {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        final RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rvScreenContainer.getLayoutParams();
+        params.width = (int) (metrics.widthPixels * scale);
+        params.height = (int) (metrics.heightPixels * scale);
+
+        /*params.width =  rvScreenContainer.getMeasuredWidth();
+        params.height = rvScreenContainer.getMeasuredHeight();*/
+
+        params.leftMargin = 0;
+
+        rvScreenContainer.clearAnimation();
+        float floatScale = 0.3f;
+        if(scale == 1){
+
+            floatScale = 1.3f;
+            rvScreenContainer.animate()
+                    .scaleX(floatScale)
+                    .scaleY(floatScale)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            rvScreenContainer.setLayoutParams(params);
+                            rvScreenContainer.clearAnimation();
+                            rvScreenContainer.setScaleX(1f);
+                            rvScreenContainer.setScaleY(1f);
+                            fullScreenVideo(scale);
+                        }
+                    });
+        }else{
+            rvScreenContainer.animate()
+                    .scaleXBy(floatScale)
+                    .scaleYBy(floatScale)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            rvScreenContainer.setLayoutParams(params);
+                            rvScreenContainer.clearAnimation();
+                            rvScreenContainer.setScaleX(1f);
+                            rvScreenContainer.setScaleY(1f);
+                            fullScreenVideo(scale);
+                        }
+                    });
+        }
+    }
+
+    private void fullScreenVideo(double scale)
     {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) vvPlayVideo.getLayoutParams();
-        params.width =  metrics.widthPixels;
-        params.height = metrics.heightPixels;
+        params.width = (int) (metrics.widthPixels * scale);
+        params.height = (int) (metrics.heightPixels * scale);
+        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        /*params.width =  rvScreenContainer.getMeasuredWidth();
+        params.height = rvScreenContainer.getMeasuredHeight();*/
+
         params.leftMargin = 0;
         vvPlayVideo.setLayoutParams(params);
     }
@@ -642,17 +737,20 @@ public class ChannelViewScreen extends AppCompatActivity {
 
                 }else{
 
-                    llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_black));
-                    buttonOnYoutube = false;
+                    if(masterList != null){
 
-                    lastPositionChannel = masterList.size() - 1;
-                    // Play Last Video
-                    ListChanelAdapter.selectedPosition  = lastPositionChannel;
-                    ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
-                    adapter.notifyDataSetChanged();
-                    ensureVisible(lvChanel, ListChanelAdapter.selectedPosition);
-                    /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
-                    playVideo(item.getItem2(),item.getItem3());*/
+                        llYoutubeContainer.setBackground(getResources().getDrawable(R.drawable.background_radian_black));
+                        buttonOnYoutube = false;
+
+                        lastPositionChannel = masterList.size() - 1;
+                        // Play Last Video
+                        ListChanelAdapter.selectedPosition  = lastPositionChannel;
+                        ListChanelAdapter adapter = (ListChanelAdapter) lvChanel.getAdapter();
+                        adapter.notifyDataSetChanged();
+                        ensureVisible(lvChanel, ListChanelAdapter.selectedPosition);
+                        /*CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                        playVideo(item.getItem2(),item.getItem3());*/
+                    }
                 }
 
                 break;
@@ -699,10 +797,12 @@ public class ChannelViewScreen extends AppCompatActivity {
                         showNavigationItem();
                     }else{
 
-                        CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
-                        playVideo(item.getItem2(),item.getItem3());
-                        itemOnSelect = false;
-                        showNavigationItem();
+                        if(masterList != null){
+                            CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
+                            playVideo(item.getItem2(),item.getItem3());
+                            itemOnSelect = false;
+                            showNavigationItem();
+                        }
                     }
                 }
 

@@ -6,14 +6,33 @@
     android:layout_height="match_parent"
     tools:context="id.net.gmedia.gmediatv.Main.ChannelViewScreen">
 
-    <id.net.gmedia.gmediatv.Utils.CustomVideoView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:id="@+id/vv_stream" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/rv_screen_container">
+
+            <id.net.gmedia.gmediatv.Utils.CustomVideoView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"
+                android:id="@+id/vv_stream" />
+
+            <ProgressBar
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:id="@+id/pb_loading"
+                android:visibility="gone"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -109,11 +128,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:id="@+id/pb_loading"
-        android:visibility="gone"/>
 </RelativeLayout>
