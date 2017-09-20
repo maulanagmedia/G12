@@ -317,6 +317,7 @@
         android:layout_height="match_parent"
         android:orientation="horizontal"
         android:gravity="right"
+        android:visibility="gone"
         android:id="@+id/ll_info_container"
         android:weightSum="1">
 

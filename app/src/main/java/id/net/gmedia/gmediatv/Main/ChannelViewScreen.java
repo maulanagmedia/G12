@@ -55,6 +55,7 @@ import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.CustomVideoView;
+import id.net.gmedia.gmediatv.Utils.DeviceInfo;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 
@@ -434,7 +435,15 @@ public class ChannelViewScreen extends AppCompatActivity {
 
     private void getLinkRTSP() {
 
-        ApiVolley apiVolley = new ApiVolley(ChannelViewScreen.this, new JSONObject(), "GET", ServerURL.getLink, "", "", 0, new ApiVolley.VolleyCallback() {
+        JSONObject jbody = new JSONObject();
+
+        try {
+            jbody.put("mac", DeviceInfo.getMacAddr());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApiVolley apiVolley = new ApiVolley(ChannelViewScreen.this, jbody, "POST", ServerURL.getLink, "", "", 0, new ApiVolley.VolleyCallback() {
             @Override
             public void onSuccess(String result) {
 

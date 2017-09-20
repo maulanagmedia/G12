@@ -34,6 +34,6 @@ public class DeviceInfo {
             }
         } catch (Exception ex) {
         }
-        return "02:00:00:00:00:00";
+        return "00:00:00:00:00:00";
     }
 }

@@ -1,5 +1,7 @@
 package id.net.gmedia.gmediatv.Main;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,7 +38,9 @@ import java.util.Collections;
 import java.util.List;
 
 import id.net.gmedia.gmediatv.R;
+import id.net.gmedia.gmediatv.RemoteUtils.ConnectionUtil;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
+import id.net.gmedia.gmediatv.Utils.DeviceInfo;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 import id.net.gmedia.gmediatv.Utils.ServiceTimerServer;
 
@@ -93,7 +97,7 @@ public class MainMenu extends RuntimePermissionsActivity {
         initUI();
 
         // For Remote access
-        //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(ServerActivity.this);
+        //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(MainMenu.this);
         mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
         registerService(ServiceUtils.DEFAULT_PORT);
         initializeReceiver();
@@ -117,6 +121,24 @@ public class MainMenu extends RuntimePermissionsActivity {
         llInfoContainer = (LinearLayout) findViewById(R.id.ll_info_container);
         ivInfo = (ImageView) findViewById(R.id.iv_info);
         tvMac = (TextView) findViewById(R.id.tv_mac);
+
+        ivInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showInformation(true);
+            }
+        });
+
+        llInfoContainer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(!b){
+                    showInformation(false);
+                }
+            }
+        });
+
+        tvMac.setText(DeviceInfo.getMacAddr());
 
         selectedChoise = 0;
         setHovered(selectedChoise);
@@ -195,25 +217,33 @@ public class MainMenu extends RuntimePermissionsActivity {
     @Override
     public void onBackPressed() {
 
-        if (doubleBackToExitPressedOnce) {
-            Intent intent = new Intent(MainMenu.this, MainMenu.class);
-            intent.putExtra("exit", true);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            //System.exit(0);
-        }
+        if(llInfoContainer.getVisibility() == View.VISIBLE){
+            showInformation(false);
+        }else{
 
-        if(!exitState && !doubleBackToExitPressedOnce){
-            this.doubleBackToExitPressedOnce = true;
-            Toast.makeText(this, getResources().getString(R.string.app_exit), Toast.LENGTH_SHORT).show();
-        }
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce=false;
+            // Origin backstage
+            if (doubleBackToExitPressedOnce) {
+                Intent intent = new Intent(MainMenu.this, MainMenu.class);
+                intent.putExtra("exit", true);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                //System.exit(0);
             }
-        }, 2000);
+
+            if(!exitState && !doubleBackToExitPressedOnce){
+                this.doubleBackToExitPressedOnce = true;
+                Toast.makeText(this, getResources().getString(R.string.app_exit), Toast.LENGTH_SHORT).show();
+            }
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 2000);
+        }
+
+
     }
 
     @Override
@@ -246,6 +276,9 @@ public class MainMenu extends RuntimePermissionsActivity {
                 break;
             case 23:
                 goToSelectedChoise();
+                break;
+            case 32:
+                showInformation(true);
                 break;
         }
         return super.onKeyDown(keyCode, event);
@@ -555,6 +588,50 @@ public class MainMenu extends RuntimePermissionsActivity {
             }
         }
     }
+
+
+    private void showInformation(final boolean show){
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                if(show && llInfoContainer.getVisibility() == View.GONE){
+                    llInfoContainer.setVisibility(View.VISIBLE);
+                    llInfoContainer.animate()
+                            .translationY(0)
+                            .alpha(1.0f)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    super.onAnimationEnd(animation);
+                                }
+                            });
+                }else if(llInfoContainer.getVisibility() == View.VISIBLE){
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            llInfoContainer.clearAnimation();
+                            llInfoContainer.animate()
+                                    .translationY(0)
+                                    .alpha(0.0f)
+                                    .setListener(new AnimatorListenerAdapter() {
+                                        @Override
+                                        public void onAnimationEnd(Animator animation) {
+                                            super.onAnimationEnd(animation);
+                                            llInfoContainer.setVisibility(View.GONE);
+                                        }
+                                    });
+                        }
+                    });
+                }
+            }
+        });
+    }
+
 
     private void getAction(final int keyCode){
 

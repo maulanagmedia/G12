@@ -12,7 +12,8 @@ public class ServerURL {
 
     public static String baseUrl = "http://gmediatv.gmedia.bz/";
 
-    public static String getLink = baseUrl + "api/link/get_link/";
+    //public static String getLink = baseUrl + "api/link/get_link/";
+    public static String getLink = baseUrl + "api/link/get_link_dummy/";
 
     public static String getLinkDummy = baseUrl + "api/link/get_link_dummy/";
 

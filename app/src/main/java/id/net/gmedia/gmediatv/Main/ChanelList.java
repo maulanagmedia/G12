@@ -41,6 +41,7 @@ import id.net.gmedia.gmediatv.Main.Adapter.AllChannelAdapter;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
+import id.net.gmedia.gmediatv.Utils.DeviceInfo;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 
@@ -85,7 +86,16 @@ public class ChanelList extends AppCompatActivity {
     private void getListChannel() {
 
         pbLoading.setVisibility(View.VISIBLE);
-        ApiVolley apiVolley = new ApiVolley(ChanelList.this, new JSONObject(), "GET", ServerURL.getLink, "", "", 0, new ApiVolley.VolleyCallback() {
+
+        JSONObject jbody = new JSONObject();
+
+        try {
+            jbody.put("mac", DeviceInfo.getMacAddr());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApiVolley apiVolley = new ApiVolley(ChanelList.this, jbody, "POST", ServerURL.getLink, "", "", 0, new ApiVolley.VolleyCallback() {
             @Override
             public void onSuccess(String result) {
 
