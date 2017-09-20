@@ -33,4 +33,6 @@ public class ServerURL {
     //Iflix
     public static String pnIflix = "iflix.play";
     public static String bwIflix = baseUrl + "apk/"+pnIflix+".apk";
+
+    public static String getLatestVersion = baseUrl + "api/link/get_latest_version/";
 }

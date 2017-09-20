@@ -2,9 +2,13 @@ package id.net.gmedia.gmediatv.Main;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
@@ -19,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.maulana.custommodul.ApiVolley;
 import com.maulana.custommodul.ApkInstaller;
 import com.maulana.custommodul.ItemValidation;
 import com.maulana.custommodul.RuntimePermissionsActivity;
@@ -64,6 +69,10 @@ public class MainMenu extends RuntimePermissionsActivity {
     private LinearLayout llInfoContainer;
     private ImageView ivInfo;
     private TextView tvMac;
+    private String version = "";
+    private String latestVersion = "";
+    private String link = "";
+    private boolean updateRequired = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -210,6 +219,90 @@ public class MainMenu extends RuntimePermissionsActivity {
                     atualizaApp.setContext(MainMenu.this);
                     atualizaApp.execute(ServerURL.bwIflix);
                 }
+            }
+        });
+
+        checkVersion();
+    }
+
+    private void checkVersion(){
+
+        PackageInfo pInfo = null;
+        version = "";
+
+        try {
+            pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        version = pInfo.versionName;
+        latestVersion = "";
+        link = "";
+
+        ApiVolley request = new ApiVolley(MainMenu.this, new JSONObject(), "GET", ServerURL.getLatestVersion, "", "", 0, new ApiVolley.VolleyCallback() {
+
+            @Override
+            public void onSuccess(String result) {
+
+                JSONObject responseAPI;
+                try {
+                    responseAPI = new JSONObject(result);
+                    String status = responseAPI.getJSONObject("metadata").getString("status");
+
+                    if(iv.parseNullInteger(status) == 200){
+                        latestVersion = responseAPI.getJSONObject("response").getString("versi");
+                        link = responseAPI.getJSONObject("response").getString("link");
+                        updateRequired = (iv.parseNullInteger(responseAPI.getJSONObject("response").getString("wajib")) == 1) ? true : false;
+
+                        if(!version.trim().equals(latestVersion.trim()) && link.length() > 0){
+
+                            final AlertDialog.Builder builder = new AlertDialog.Builder(MainMenu.this);
+                            if(updateRequired){
+
+                                builder.setIcon(R.mipmap.ic_launcher)
+                                        .setTitle("Update")
+                                        .setMessage("Versi terbaru "+latestVersion+" telah tersedia, mohon download versi terbaru.")
+                                        .setPositiveButton("Update Sekarang", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                                                startActivity(browserIntent);
+                                            }
+                                        })
+                                        .setCancelable(false)
+                                        .show();
+                            }else{
+
+                                builder.setIcon(R.mipmap.ic_launcher)
+                                        .setTitle("Update")
+                                        .setMessage("Versi terbaru "+latestVersion+" telah tersedia, mohon download versi terbaru.")
+                                        .setPositiveButton("Update Sekarang", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                                                startActivity(browserIntent);
+                                            }
+                                        })
+                                        .setNegativeButton("Update Nanti", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        }).show();
+                            }
+                        }
+                    }
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String result) {
+
             }
         });
     }
