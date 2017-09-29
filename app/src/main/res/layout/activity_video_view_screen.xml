@@ -4,16 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="id.net.gmedia.gmediatv.Main.ChannelViewScreen">
+    tools:context="id.net.gmedia.gmediatv.Main.ChannelViewScreen"
+    android:background="@color/color_white">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/color_white">
+
+        <WebView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/wv_ads"></WebView>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/rv_screen_container">
+            android:id="@+id/rv_screen_container"
+            android:background="@color/color_white">
 
             <id.net.gmedia.gmediatv.Utils.CustomVideoView
                 android:layout_width="match_parent"
@@ -30,7 +38,20 @@
                 android:layout_centerInParent="true"
                 android:id="@+id/pb_loading"
                 android:visibility="gone"/>
+
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:src="@mipmap/ic_launcher"
+                android:layout_marginLeft="@dimen/default_horizontal_margin"
+                android:layout_marginBottom="@dimen/default_horizontal_margin"/>
         </RelativeLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </RelativeLayout>
 

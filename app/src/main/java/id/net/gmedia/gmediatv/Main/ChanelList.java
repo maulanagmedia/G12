@@ -3,8 +3,14 @@ package id.net.gmedia.gmediatv.Main;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -28,10 +34,12 @@ import org.json.JSONObject;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +50,8 @@ import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.DeviceInfo;
+import id.net.gmedia.gmediatv.Utils.FormatItem;
+import id.net.gmedia.gmediatv.Utils.InternetCheck;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 
@@ -53,11 +63,15 @@ public class ChanelList extends AppCompatActivity {
     private SavedChanelManager chanelManager;
     private ProgressBar pbLoading;
     private final String TAG = "ChannelList";
+    private SavedChanelManager savedChanel;
+    private int savedC = 0;
 
     //For remote
     private NsdManager mNsdManager;
     private ServerSocket serverSocket;
     private SocketServerThread socketServerThread;
+
+    private WifiManager wifi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +93,52 @@ public class ChanelList extends AppCompatActivity {
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
         chanelManager = new SavedChanelManager(ChanelList.this);
 
+        savedChanel = new SavedChanelManager(ChanelList.this);
+        savedC = 0;
         ServiceUtils.lockedClient = "";
-        getListChannel();
+        wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        //getDataWithConnection();
+    }
+
+    private void getDataWithConnection() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        //return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+
+        if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+            new InternetCheck(ChanelList.this).isInternetConnectionAvailable(new InternetCheck.InternetCheckListener() {
+
+                @Override
+                public void onComplete(boolean connected) {
+                    if(connected){
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getListChannel();
+                            }
+                        });
+                    }else{
+                        Snackbar.make(findViewById(android.R.id.content), R.string.wifi_not_connected,
+                                Snackbar.LENGTH_INDEFINITE).setAction("OK",
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (wifi.isWifiEnabled() == false)
+                                        {
+                                            wifi.setWifiEnabled(true);
+                                        }
+                                        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                                    }
+                                }).show();
+                    }
+                }
+            });
+        } else {
+            Log.d("conect error", "No network available!");
+        }
     }
 
     private void getListChannel() {
@@ -90,7 +148,7 @@ public class ChanelList extends AppCompatActivity {
         JSONObject jbody = new JSONObject();
 
         try {
-            jbody.put("mac", DeviceInfo.getMacAddr());
+            jbody.put("mac", FormatItem.getMacAddress());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -107,10 +165,16 @@ public class ChanelList extends AppCompatActivity {
 
                     if(iv.parseNullInteger(status) == 200) {
 
+                        savedC = 0;
+                        int s = 0;
                         JSONArray jsonArray = response.getJSONArray("response");
                         for(int i = 0; i < jsonArray.length();i++){
                             JSONObject jo = jsonArray.getJSONObject(i);
                             masterList.add(new CustomItem(jo.getString("id"), jo.getString("nama"), jo.getString("link")));
+                            if(jo.getString("nama").equals(savedChanel.getNama()) && jo.getString("link").equals(savedChanel.getLink())){
+                                savedC = s;
+                            }
+                            s++;
                         }
                     }
 
@@ -144,6 +208,9 @@ public class ChanelList extends AppCompatActivity {
 //        rvListMenu.addItemDecoration(new NavMenu.GridSpacingItemDecoration(2, dpToPx(10), true));
             rvChanggelList.setItemAnimator(new DefaultItemAnimator());
             rvChanggelList.setAdapter(menuAdapter);
+
+            menuAdapter.selectedPosition = savedC;
+            menuAdapter.notifyDataSetChanged();
         }
     }
 
@@ -256,6 +323,9 @@ public class ChanelList extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        getDataWithConnection();
+
         if (mNsdManager != null) {
             registerService(ServiceUtils.DEFAULT_PORT);
         }
@@ -466,4 +536,6 @@ public class ChanelList extends AppCompatActivity {
             }
         });
     }
+
+
 }

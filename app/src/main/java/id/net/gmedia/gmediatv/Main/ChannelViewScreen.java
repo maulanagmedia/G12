@@ -6,11 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.provider.Settings;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -18,6 +23,10 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,6 +66,8 @@ import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.CustomVideoView;
 import id.net.gmedia.gmediatv.Utils.DeviceInfo;
+import id.net.gmedia.gmediatv.Utils.FormatItem;
+import id.net.gmedia.gmediatv.Utils.InternetCheck;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 
@@ -66,7 +77,8 @@ public class ChannelViewScreen extends AppCompatActivity {
     private ItemValidation iv = new ItemValidation();
     private boolean showNavigator = false;
     private int timerTime = 10; // in second
-    private int timerTimeBack = 5; // in second
+    private final int timerAdsChecker = 5; // in minutes
+    private int animationDuration = 800; // in milisecond
     private TextView tvVolume;
     private SeekBar sbVolume;
     private AudioManager audioManager;
@@ -124,7 +136,13 @@ public class ChannelViewScreen extends AppCompatActivity {
     private SocketServerThread socketServerThread;
     private final String TAG = "Chanel";
     private RelativeLayout rvScreenContainer;
-
+    private WebView wvAds;
+    private List<CustomItem> adsList;
+    private boolean isLoad = true;
+    private WifiManager wifi;
+    private double scaleVideo = 1;
+    private boolean isFullScreen = true;
+    private boolean isTimerPaused = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,6 +150,9 @@ public class ChannelViewScreen extends AppCompatActivity {
         setContentView(R.layout.activity_video_view_screen);
 
         isTypeChannel = false;
+        isTimerPaused = false;
+        scaleVideo = 1;
+        isFullScreen = true;
         savedChanel = new SavedChanelManager(ChannelViewScreen.this);
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
@@ -164,6 +185,8 @@ public class ChannelViewScreen extends AppCompatActivity {
         llChannelSelector = (LinearLayout) findViewById(R.id.ll_channel_selector);
         tvChannelSelector = (TextView) findViewById(R.id.tv_channel_selector);
         rvScreenContainer = (RelativeLayout) findViewById(R.id.rv_screen_container);
+        wvAds = (WebView) findViewById(R.id.wv_ads);
+        wvAds.setWebViewClient(new WebViewClient());
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sbVolume.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
@@ -171,7 +194,8 @@ public class ChannelViewScreen extends AppCompatActivity {
         tapped = true;
         showNavigationItem();
         if(savedChanel.isSaved()) playVideo(savedChanel.getNama(), savedChanel.getLink());
-        getLinkRTSP();
+        wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        //getDataWithConnection();
 
         vvPlayVideo.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -279,37 +303,49 @@ public class ChannelViewScreen extends AppCompatActivity {
             }
         });
 
-        backNormalScale(5);
-        Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        setVideoCOntainerScale(1);
-                        backNormalScale(timerTimeBack);
-                    }
-                });
-            }
-        },0 , timerTime * 1000);
+        //getAds();
+        setTimerAds();
     }
 
-    private void backNormalScale(int Seconds){
+    private void getDataWithConnection() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        //return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 
-        new CountDownTimer(Seconds* 1000+1000, 1000) {
+        if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
+            new InternetCheck(ChannelViewScreen.this).isInternetConnectionAvailable(new InternetCheck.InternetCheckListener() {
 
-            public void onTick(long millisUntilFinished) {
-                int seconds = (int) (millisUntilFinished / 1000);
-                int minutes = seconds / 60;
-                seconds = seconds % 60;
-            }
+                @Override
+                public void onComplete(boolean connected) {
+                    if(connected){
 
-            public void onFinish() {
-                setVideoCOntainerScale(0.8);
-            }
-        }.start();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getLinkRTSP();
+                                getAds();
+                            }
+                        });
+                    }else{
+                        Snackbar.make(findViewById(android.R.id.content), R.string.wifi_not_connected,
+                                Snackbar.LENGTH_INDEFINITE).setAction("OK",
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (wifi.isWifiEnabled() == false)
+                                        {
+                                            wifi.setWifiEnabled(true);
+                                        }
+                                        startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+                                    }
+                                }).show();
+                    }
+                }
+            });
+        } else {
+            Log.d("conect error", "No network available!");
+        }
     }
 
     private void redirrectToYoutube(){
@@ -357,79 +393,6 @@ public class ChannelViewScreen extends AppCompatActivity {
 
     private void showNavigationItem(){
 
-        /*Thread thread = new Thread() {
-            @Override
-            public void run() {
-
-                try { // this code using timer and this not a good practice for automatically hide
-
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-
-                            if(rvListVideoContainer.getVisibility() == View.GONE && tapped){
-                                rvListVideoContainer.setVisibility(View.VISIBLE);
-                                rvListVideoContainer.animate()
-                                        .translationY(0)
-                                        .alpha(1.0f)
-                                        .setListener(new AnimatorListenerAdapter() {
-                                            @Override
-                                            public void onAnimationEnd(Animator animation) {
-                                                super.onAnimationEnd(animation);
-                                            }
-                                        });
-                            }else if(rvListVideoContainer.getVisibility() == View.VISIBLE && !itemOnSelect && tapped){
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        rvListVideoContainer.clearAnimation();
-                                        rvListVideoContainer.animate()
-                                                .translationY(0)
-                                                .alpha(0.0f)
-                                                .setListener(new AnimatorListenerAdapter() {
-                                                    @Override
-                                                    public void onAnimationEnd(Animator animation) {
-                                                        super.onAnimationEnd(animation);
-                                                        rvListVideoContainer.setVisibility(View.GONE);
-                                                    }
-                                                });
-                                    }
-                                });
-                            }
-                            tapped = false;
-                        }
-                    });
-                    Thread.sleep(delayTime);
-                } catch (InterruptedException e) {
-                }
-
-                if(!itemOnSelect && rvListVideoContainer.getVisibility() == View.VISIBLE && !tapped) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            rvListVideoContainer.clearAnimation();
-                            rvListVideoContainer.animate()
-                                    .translationY(0)
-                                    .alpha(0.0f)
-                                    .setListener(new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            super.onAnimationEnd(animation);
-                                            rvListVideoContainer.setVisibility(View.GONE);
-                                        }
-                                    });
-                        }
-                    });
-                    tapped = true;
-                }
-            }
-        };
-        thread.start();*/
-
         runOnUiThread(new Runnable() {
 
             @Override
@@ -470,12 +433,117 @@ public class ChannelViewScreen extends AppCompatActivity {
         });
     }
 
+    private void getAds() {
+
+        JSONObject jbody = new JSONObject();
+        adsList = new ArrayList<>();
+
+        try {
+            jbody.put("mac", FormatItem.getMacAddress());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApiVolley apiVolley = new ApiVolley(ChannelViewScreen.this, jbody, "POST", ServerURL.getAds, "", "", 0, new ApiVolley.VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+
+                try {
+                    JSONObject response = new JSONObject(result);
+                    String status = response.getJSONObject("metadata").getString("status");
+
+                    if(iv.parseNullInteger(status) == 200) {
+
+                        JSONArray jsonArray = response.getJSONArray("response");
+                        for(int i = 0; i < jsonArray.length();i++){
+                            JSONObject jo = jsonArray.getJSONObject(i);
+                            adsList.add(new CustomItem(jo.getString("id"), jo.getString("link"), jo.getString("showing_duration"), jo.getString("scale_screen")));
+                        }
+
+                        setTimerAds();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String result) {
+
+            }
+        });
+    }
+
+    private void setTimerAds(){
+
+        if(isLoad){
+            isLoad = false;
+            Timer timerAds = new Timer();
+            timerAds.schedule(new TimerTask() {
+                @Override
+                public void run() {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if(adsList != null && adsList.size() > 0 && !isTimerPaused){
+                                isTimerPaused = true;
+                                CustomItem item =  adsList.get(0);
+                                int duration = iv.parseNullInteger(item.getItem3());
+                                double scale = iv.parseNullFloat(item.getItem4());
+                                setVideoCOntainerScale1(false, scale);
+                                playAdsTimer(duration,item.getItem2(), scale);
+                            }else if(!isTimerPaused){
+                                getAds();
+                            }
+                        }
+                    });
+                }
+            },(timerAdsChecker * 60 * 1000) , (timerAdsChecker * 60 * 1000));
+        }
+    }
+
+    private void playAdsTimer(int Seconds, String url, final double scale){
+
+        wvAds.setWebViewClient(new WebViewClient());
+        wvAds.loadUrl(url);
+        new CountDownTimer(Seconds* 1000+1000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                int seconds = (int) (millisUntilFinished / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+            }
+
+            public void onFinish() {
+
+                if(adsList != null){
+                    adsList.remove(0);
+
+                    if(adsList.size() > 0){
+                        CustomItem nowAds = adsList.get(0);
+                        int duration = iv.parseNullInteger(nowAds.getItem3());
+                        String adsURL = nowAds.getItem2();
+                        playAdsTimer(duration, adsURL, scale);
+                    }else{
+                        backNormalScale1(1, scale);
+                        isTimerPaused = false;
+                    }
+                }else{
+                    isTimerPaused = false;
+                }
+            }
+        }.start();
+    }
+
     private void getLinkRTSP() {
 
         JSONObject jbody = new JSONObject();
 
         try {
-            jbody.put("mac", DeviceInfo.getMacAddr());
+            jbody.put("mac", FormatItem.getMacAddress());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -546,9 +614,15 @@ public class ChannelViewScreen extends AppCompatActivity {
 
     private void playVideo(String nama, String url){
 
+        vvPlayVideo.stopPlayback();
+        vvPlayVideo.clearAnimation();
+        vvPlayVideo.suspend();
+        vvPlayVideo.setVideoURI(null);
+
         pbLoading.setVisibility(View.VISIBLE);
         /*MediaController mediaController = new MediaController(ChannelViewScreen.this);
         mediaController.setAnchorView(vvPlayVideo);*/
+
         Uri uri = Uri.parse(url);
         savedChanel.saveLastChanel(nama, url);
         vvPlayVideo.setVideoURI(uri);
@@ -574,14 +648,14 @@ public class ChannelViewScreen extends AppCompatActivity {
                 pbLoading.setVisibility(View.GONE);
                 mp.start();
 
-                fullScreenVideo(1);
+                fullScreenVideo(scaleVideo);
                 mp.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
 
                     @Override
                     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
 
                         mp.start();
-                        fullScreenVideo(1);
+                        fullScreenVideo(scaleVideo);
                     }
                 });
             }
@@ -605,54 +679,93 @@ public class ChannelViewScreen extends AppCompatActivity {
         });
     }
 
-    private void setVideoCOntainerScale(final double scale)
+    private void setVideoCOntainerScale1(final boolean reverse, final double scale)
     {
-        DisplayMetrics metrics = new DisplayMetrics();
+
+        scaleVideo = scale;
+        float floatScale = (float) scale;
+        isFullScreen = reverse;
+        fullScreenVideo(scale);
+        if(reverse){
+            //scaleView(rvScreenContainer, 1, 1+(1-floatScale));
+            scaleView(rvScreenContainer, floatScale, 1);
+        }else{
+            scaleView(rvScreenContainer, 1, floatScale);
+        }
+    }
+
+    public void scaleView(View v, float startScale, final float endScale) {
+
+        final DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         final RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rvScreenContainer.getLayoutParams();
-        params.width = (int) (metrics.widthPixels * scale);
-        params.height = (int) (metrics.heightPixels * scale);
-
-        /*params.width =  rvScreenContainer.getMeasuredWidth();
-        params.height = rvScreenContainer.getMeasuredHeight();*/
-
         params.leftMargin = 0;
 
-        rvScreenContainer.clearAnimation();
-        float floatScale = 0.3f;
-        if(scale == 1){
-
-            floatScale = 1.3f;
-            rvScreenContainer.animate()
-                    .scaleX(floatScale)
-                    .scaleY(floatScale)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            rvScreenContainer.setLayoutParams(params);
-                            rvScreenContainer.clearAnimation();
-                            rvScreenContainer.setScaleX(1f);
-                            rvScreenContainer.setScaleY(1f);
-                            fullScreenVideo(scale);
-                        }
-                    });
-        }else{
-            rvScreenContainer.animate()
-                    .scaleXBy(floatScale)
-                    .scaleYBy(floatScale)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            super.onAnimationEnd(animation);
-                            rvScreenContainer.setLayoutParams(params);
-                            rvScreenContainer.clearAnimation();
-                            rvScreenContainer.setScaleX(1f);
-                            rvScreenContainer.setScaleY(1f);
-                            fullScreenVideo(scale);
-                        }
-                    });
+        if(isFullScreen){
+            params.width = (int) (metrics.widthPixels * 1);
+            params.height = (int) (metrics.heightPixels * 1);
+            rvScreenContainer.setScaleX(endScale);
+            rvScreenContainer.setScaleY(endScale);
+            rvScreenContainer.setPivotX(0);
+            rvScreenContainer.setPivotY(0);
         }
+
+        Animation anim = new ScaleAnimation(
+                startScale, endScale, // Start and end values for the X axis scaling
+                startScale, endScale, // Start and end values for the Y axis scaling
+                Animation.RELATIVE_TO_SELF, 0f, // Pivot point of X scaling
+                Animation.RELATIVE_TO_SELF, 0f); // Pivot point of Y scaling
+        anim.setFillAfter(true); // Needed to keep the result of the animation
+        anim.setDuration(1000);
+        anim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!isFullScreen){
+                            rvScreenContainer.clearAnimation();
+                            rvScreenContainer.setScaleX(1);
+                            rvScreenContainer.setScaleY(1);
+                            rvScreenContainer.setPivotX(0);
+                            rvScreenContainer.setPivotY(0);
+                            params.width = (int) (metrics.widthPixels * endScale);
+                            params.height = (int) (metrics.heightPixels * endScale);
+                        }
+                        fullScreenVideo(endScale);
+                    }
+                });
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        v.startAnimation(anim);
+    }
+
+    private void backNormalScale1(int Seconds, final double scale){
+
+        new CountDownTimer(Seconds* 1000+1000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                int seconds = (int) (millisUntilFinished / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+            }
+
+            public void onFinish() {
+                wvAds.setWebViewClient(new WebViewClient());
+                wvAds.loadUrl("about:blank");
+                setVideoCOntainerScale1(true,scale);
+            }
+        }.start();
     }
 
     private void fullScreenVideo(double scale)
@@ -660,18 +773,21 @@ public class ChannelViewScreen extends AppCompatActivity {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) vvPlayVideo.getLayoutParams();
-        params.width = (int) (metrics.widthPixels * scale);
-        params.height = (int) (metrics.heightPixels * scale);
-        params.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        params.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        if(isFullScreen){
+           scale = 1;
+        }
+        double doubleWidth = metrics.widthPixels * scale;
+        double doubleHeight = metrics.heightPixels * scale;
+        RelativeLayout.LayoutParams newparams = new RelativeLayout.LayoutParams((int) doubleWidth,(int) doubleHeight);
+        newparams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        newparams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        newparams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        newparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 
         /*params.width =  rvScreenContainer.getMeasuredWidth();
         params.height = rvScreenContainer.getMeasuredHeight();*/
 
-        params.leftMargin = 0;
-        vvPlayVideo.setLayoutParams(params);
+        vvPlayVideo.setLayoutParams(newparams);
     }
 
     @Override
@@ -898,7 +1014,6 @@ public class ChannelViewScreen extends AppCompatActivity {
                                 CustomItem item = masterList.get(ListChanelAdapter.selectedPosition);
                                 playVideo(item.getItem2(),item.getItem3());
 
-
                             }else{
 
                                 Toast.makeText(ChannelViewScreen.this, "Channel tidak tersedia", Toast.LENGTH_SHORT).show();
@@ -1011,6 +1126,8 @@ public class ChannelViewScreen extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        getDataWithConnection();
         if (mNsdManager != null) {
             registerService(ServiceUtils.DEFAULT_PORT);
         }

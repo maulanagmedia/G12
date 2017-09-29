@@ -1,5 +1,6 @@
 package id.net.gmedia.gmediatv.Main;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.AlertDialog;
@@ -11,7 +12,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -45,7 +48,7 @@ import java.util.List;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ConnectionUtil;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
-import id.net.gmedia.gmediatv.Utils.DeviceInfo;
+import id.net.gmedia.gmediatv.Utils.FormatItem;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
 import id.net.gmedia.gmediatv.Utils.ServiceTimerServer;
 
@@ -73,6 +76,7 @@ public class MainMenu extends RuntimePermissionsActivity {
     private String latestVersion = "";
     private String link = "";
     private boolean updateRequired = false;
+    private WifiManager wifi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,10 +89,13 @@ public class MainMenu extends RuntimePermissionsActivity {
                 MainMenu.this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
                 MainMenu.this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
                 MainMenu.this, android.Manifest.permission.RECEIVE_BOOT_COMPLETED) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
-                MainMenu.this, android.Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+                MainMenu.this, android.Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                MainMenu.this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                MainMenu.this, Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                MainMenu.this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
 
             MainMenu.super.requestAppPermissions(new
-                            String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WAKE_LOCK, android.Manifest.permission.RECEIVE_BOOT_COMPLETED}, R.string
+                            String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WAKE_LOCK, android.Manifest.permission.RECEIVE_BOOT_COMPLETED, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_NETWORK_STATE}, R.string
                             .runtime_permissions_txt
                     , REQUEST_PERMISSIONS);
         }
@@ -115,6 +122,20 @@ public class MainMenu extends RuntimePermissionsActivity {
     @Override
     public void onPermissionsGranted(int requestCode) {
 
+        wifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (wifi.isWifiEnabled() == false)
+        {
+            //Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled", Toast.LENGTH_LONG).show();
+            /*Snackbar.make(findViewById(android.R.id.content), "Wifi is disabled, please making it enabled",
+                    Snackbar.LENGTH_SHORT).setAction("OK",
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                        }
+                    }).show();*/
+            wifi.setWifiEnabled(true);
+        }
     }
 
     private void initUI() {
@@ -147,7 +168,7 @@ public class MainMenu extends RuntimePermissionsActivity {
             }
         });
 
-        tvMac.setText(DeviceInfo.getMacAddr());
+        tvMac.setText(FormatItem.getMacAddress());
 
         selectedChoise = 0;
         setHovered(selectedChoise);
