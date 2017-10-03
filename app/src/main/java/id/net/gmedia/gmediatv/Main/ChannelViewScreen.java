@@ -38,9 +38,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.maulana.custommodul.ApiVolley;
 import com.maulana.custommodul.ApkInstaller;
 import com.maulana.custommodul.CustomItem;
+import com.maulana.custommodul.ImageUtils;
 import com.maulana.custommodul.ItemValidation;
 
 import org.json.JSONArray;
@@ -143,6 +145,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     private double scaleVideo = 1;
     private boolean isFullScreen = true;
     private boolean isTimerPaused = false;
+    private ImageView ivLogoTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,6 +183,7 @@ public class ChannelViewScreen extends AppCompatActivity {
         lvChanel = (ListView) findViewById(R.id.lv_chanel);
         rvListVideoContainer = (RelativeLayout) findViewById(R.id.rl_list_chanel);
         ivUp = (ImageView) findViewById(R.id.iv_up);
+        ivLogoTV = (ImageView) findViewById(R.id.iv_tv_logo);
         ivDown = (ImageView) findViewById(R.id.iv_down);
         pbLoading = (ProgressBar) findViewById(R.id.pb_loading);
         llChannelSelector = (LinearLayout) findViewById(R.id.ll_channel_selector);
@@ -323,6 +327,7 @@ public class ChannelViewScreen extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                getLogo();
                                 getLinkRTSP();
                                 getAds();
                             }
@@ -458,6 +463,50 @@ public class ChannelViewScreen extends AppCompatActivity {
                         for(int i = 0; i < jsonArray.length();i++){
                             JSONObject jo = jsonArray.getJSONObject(i);
                             adsList.add(new CustomItem(jo.getString("id"), jo.getString("link"), jo.getString("showing_duration"), jo.getString("scale_screen")));
+                        }
+
+                        setTimerAds();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String result) {
+
+            }
+        });
+    }
+
+    private void getLogo() {
+
+        JSONObject jbody = new JSONObject();
+        adsList = new ArrayList<>();
+
+        try {
+            jbody.put("mac", FormatItem.getMacAddress());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApiVolley apiVolley = new ApiVolley(ChannelViewScreen.this, jbody, "POST", ServerURL.getLogo, "", "", 0, new ApiVolley.VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+
+                try {
+                    JSONObject response = new JSONObject(result);
+                    String status = response.getJSONObject("metadata").getString("status");
+
+                    if(iv.parseNullInteger(status) == 200) {
+
+                        String linkLogo = response.getJSONObject("response").getString("link");
+                        if(linkLogo.length() > 0){
+                            ImageUtils iu = new ImageUtils();
+                            iu.LoadGIFImage(ChannelViewScreen.this, linkLogo, ivLogoTV, R.mipmap.ic_launcher);
+                            //iu.LoadRealImage(ChannelViewScreen.this, linkLogo,ivLogoTV);
+                            //Glide.with(ChannelViewScreen.this).load(Uri.parse(linkLogo)).error(R.mipmap.ic_launcher).placeholder(R.mipmap.ic_launcher).into(ivLogoTV);
                         }
 
                         setTimerAds();

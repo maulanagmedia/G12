@@ -10,6 +10,8 @@ import android.util.Base64;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -87,10 +89,11 @@ public class ImageUtils {
         Picasso.with(context).load(uri).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).resize(width, height).centerCrop().error(context.getResources().getDrawable(R.drawable.ic_thumbnail)).placeholder(context.getResources().getDrawable(R.drawable.ic_thumbnail)).into(image);
     }
 
-    /*public void LoadAdvImage(Context context, String uri, final ImageView image){
+    public void LoadGIFImage(Context context, String uri, final ImageView image, final int thumbnail){
 
-        Glide.with(context).load(Uri.parse(uri)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).error(context.getResources().getDrawable(R.drawable.ic_thumb_adv)).override(360,78).placeholder(context.getResources().getDrawable(R.drawable.ic_thumb_adv)).into(image);
-    }*/
+        //Glide.with(context).load(Uri.parse(uri)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
+        Glide.with(context).load(Uri.parse(uri)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).error(context.getResources().getDrawable(thumbnail)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
+    }
 
     public static Bitmap decodeBitmap(Uri bitmapUri, ContentResolver resolver, int width, int height) throws IOException {
         InputStream is = resolver.openInputStream(bitmapUri);

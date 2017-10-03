@@ -15,6 +15,7 @@ public class ServerURL {
     public static String getLink = baseUrl + "api/link/get_link/";
     //public static String getLink = baseUrl + "api/link/get_link_dummy/";
     public static String getAds = baseUrl + "api/link/get_ads/";
+    public static String getLogo = baseUrl + "api/link/get_logo/";
     public static String testConnection = baseUrl + "api/link/test_connection/";
 
     public static String getListYoutubeVideoURL(String nextPageToken, String pagePerRow, String keyword){
