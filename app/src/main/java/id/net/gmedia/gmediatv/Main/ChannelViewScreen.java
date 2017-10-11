@@ -80,6 +80,7 @@ public class ChannelViewScreen extends AppCompatActivity {
     private boolean showNavigator = false;
     private int timerTime = 10; // in second
     private final int timerAdsChecker = 5; // in minutes
+    private final int timerATChecker = 3; // in minutes
     private int animationDuration = 800; // in milisecond
     private TextView tvVolume;
     private SeekBar sbVolume;
@@ -141,11 +142,15 @@ public class ChannelViewScreen extends AppCompatActivity {
     private WebView wvAds;
     private List<CustomItem> adsList;
     private boolean isLoad = true;
+    private boolean isAppearTextLoad = true;
     private WifiManager wifi;
     private double scaleVideo = 1;
     private boolean isFullScreen = true;
     private boolean isTimerPaused = false;
+    private boolean isTimerATPaused = false;
     private ImageView ivLogoTV;
+    private TextView tvUser;
+    private String appearText = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +159,7 @@ public class ChannelViewScreen extends AppCompatActivity {
 
         isTypeChannel = false;
         isTimerPaused = false;
+        isTimerATPaused = false;
         scaleVideo = 1;
         isFullScreen = true;
         savedChanel = new SavedChanelManager(ChannelViewScreen.this);
@@ -191,6 +197,8 @@ public class ChannelViewScreen extends AppCompatActivity {
         rvScreenContainer = (RelativeLayout) findViewById(R.id.rv_screen_container);
         wvAds = (WebView) findViewById(R.id.wv_ads);
         wvAds.setWebViewClient(new WebViewClient());
+        tvUser = (TextView) findViewById(R.id.tv_user);
+        tvUser.setSelected(true);
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sbVolume.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
@@ -330,6 +338,7 @@ public class ChannelViewScreen extends AppCompatActivity {
                                 getLogo();
                                 getLinkRTSP();
                                 getAds();
+                                getAppearText();
                             }
                         });
                     }else{
@@ -480,6 +489,50 @@ public class ChannelViewScreen extends AppCompatActivity {
         });
     }
 
+    private void getAppearText() {
+
+        JSONObject jbody = new JSONObject();
+        appearText = "";
+
+        try {
+            jbody.put("mac", FormatItem.getMacAddress());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        ApiVolley apiVolley = new ApiVolley(ChannelViewScreen.this, jbody, "POST", ServerURL.getAppearText, "", "", 0, new ApiVolley.VolleyCallback() {
+            @Override
+            public void onSuccess(String result) {
+
+                try {
+                    JSONObject response = new JSONObject(result);
+                    String status = response.getJSONObject("metadata").getString("status");
+
+                    if(iv.parseNullInteger(status) == 200) {
+
+                        JSONArray jsonArray = response.getJSONArray("response");
+                        for(int i = 0; i < jsonArray.length();i++){
+                            JSONObject jo = jsonArray.getJSONObject(i);
+                            appearText = jo.getString("text");
+                            String duration = jo.getString("showing_duration");
+                            setTimerAppearText(iv.parseNullInteger(duration));
+
+                        }
+
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onError(String result) {
+
+            }
+        });
+    }
+
     private void getLogo() {
 
         JSONObject jbody = new JSONObject();
@@ -586,6 +639,93 @@ public class ChannelViewScreen extends AppCompatActivity {
             }
         }.start();
     }
+
+    //region appear text
+    private void setTimerAppearText(final int duration){
+
+        if(isAppearTextLoad){
+            isAppearTextLoad = false;
+            Timer timerAT = new Timer();
+            timerAT.schedule(new TimerTask() {
+                @Override
+                public void run() {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            if(appearText.length() > 0 && !isTimerATPaused){
+                                isTimerATPaused = true;
+                                playATTimer(duration, appearText);
+                            }else if(!isTimerPaused){
+                                getAppearText();
+                            }
+                        }
+                    });
+                }
+            },1000 , (timerATChecker * 60 * 1000));
+        }
+    }
+
+    private void playATTimer(int Seconds, final String message){
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                String msg = message;
+                for(int i = 0 ; i < 5; i++){
+                    msg = msg + " • " + message;
+                }
+
+                tvUser.setText(msg);
+                tvUser.setVisibility(View.VISIBLE);
+                tvUser.animate()
+                        .translationY(0)
+                        .alpha(1.0f)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                super.onAnimationEnd(animation);
+                            }
+                        });
+
+            }
+        });
+
+        new CountDownTimer(Seconds* 1000+1000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                int seconds = (int) (millisUntilFinished / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+            }
+
+            public void onFinish() {
+
+                isTimerATPaused = false;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        appearText = "";
+                        tvUser.clearAnimation();
+                        tvUser.animate()
+                                .translationY(0)
+                                .alpha(0.0f)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        super.onAnimationEnd(animation);
+                                        tvUser.setText("");
+                                        tvUser.setVisibility(View.GONE);
+                                    }
+                                });
+                    }
+                });
+            }
+        }.start();
+    }
+    //endregion
 
     private void getLinkRTSP() {
 
