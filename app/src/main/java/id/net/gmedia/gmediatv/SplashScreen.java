@@ -22,7 +22,9 @@ public class SplashScreen extends AppCompatActivity {
             new Handler().postDelayed(new Runnable() {
                 public void run() {
                     //startActivity(new Intent(SplashScreen.this, DaftarVideo.class));
-                    startActivity(new Intent(SplashScreen.this, MainMenu.class));
+                    Intent intent = new Intent(SplashScreen.this, MainMenu.class);
+                    intent.putExtra("splashed", true);
+                    startActivity(intent);
                     finish();
                 }
             }, secondsDelayed * 1000);
@@ -32,6 +34,7 @@ public class SplashScreen extends AppCompatActivity {
         else {
             //Intent goToMainActivity = new Intent(SplashScreen.this, DaftarVideo.class);
             Intent goToMainActivity = new Intent(SplashScreen.this, MainMenu.class);
+            goToMainActivity.putExtra("splashed", true);
             goToMainActivity.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(goToMainActivity);
             finish();

@@ -38,7 +38,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.maulana.custommodul.ApiVolley;
 import com.maulana.custommodul.ApkInstaller;
 import com.maulana.custommodul.CustomItem;
@@ -63,11 +62,11 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import id.net.gmedia.gmediatv.CustomView.ScrollTextView;
 import id.net.gmedia.gmediatv.Main.Adapter.ListChanelAdapter;
 import id.net.gmedia.gmediatv.R;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.CustomVideoView;
-import id.net.gmedia.gmediatv.Utils.DeviceInfo;
 import id.net.gmedia.gmediatv.Utils.FormatItem;
 import id.net.gmedia.gmediatv.Utils.InternetCheck;
 import id.net.gmedia.gmediatv.Utils.SavedChanelManager;
@@ -111,6 +110,7 @@ public class ChannelViewScreen extends AppCompatActivity {
         }
     };
     private boolean tapped = false;
+    private boolean isFirstLoad = true;
 
     private Runnable handlerRunnableDown = new Runnable() {
         @Override
@@ -149,8 +149,12 @@ public class ChannelViewScreen extends AppCompatActivity {
     private boolean isTimerPaused = false;
     private boolean isTimerATPaused = false;
     private ImageView ivLogoTV;
-    private TextView tvUser;
+    private ScrollTextView tvUser;
     private String appearText = "";
+    private int marqueeSpeed = 10000;
+    private int repeateMarquee = 5;
+    private Handler vvHandler;
+    private Runnable vvRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +166,7 @@ public class ChannelViewScreen extends AppCompatActivity {
         isTimerATPaused = false;
         scaleVideo = 1;
         isFullScreen = true;
+        isFirstLoad = true;
         savedChanel = new SavedChanelManager(ChannelViewScreen.this);
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
@@ -197,8 +202,10 @@ public class ChannelViewScreen extends AppCompatActivity {
         rvScreenContainer = (RelativeLayout) findViewById(R.id.rv_screen_container);
         wvAds = (WebView) findViewById(R.id.wv_ads);
         wvAds.setWebViewClient(new WebViewClient());
-        tvUser = (TextView) findViewById(R.id.tv_user);
+        tvUser = (ScrollTextView) findViewById(R.id.tv_user);
         tvUser.setSelected(true);
+        tvUser.setTextColor(getResources().getColor(R.color.color_text_marquee));
+        tvUser.startScroll();
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sbVolume.setMax(audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
@@ -657,7 +664,7 @@ public class ChannelViewScreen extends AppCompatActivity {
                             if(appearText.length() > 0 && !isTimerATPaused){
                                 isTimerATPaused = true;
                                 playATTimer(duration, appearText);
-                            }else if(!isTimerPaused){
+                            }else if(!isTimerATPaused){
                                 getAppearText();
                             }
                         }
@@ -674,11 +681,13 @@ public class ChannelViewScreen extends AppCompatActivity {
             public void run() {
 
                 String msg = message;
-                for(int i = 0 ; i < 5; i++){
+                for(int i = 0 ; i < repeateMarquee; i++){
                     msg = msg + " • " + message;
                 }
 
                 tvUser.setText(msg);
+                tvUser.setSelected(true);
+                tvUser.startScroll();
                 tvUser.setVisibility(View.VISIBLE);
                 tvUser.animate()
                         .translationY(0)
@@ -866,6 +875,27 @@ public class ChannelViewScreen extends AppCompatActivity {
                 return true;
             }
         });
+
+        /*if(isFirstLoad){
+            isFirstLoad = false;
+
+            vvHandler = new Handler();
+            vvRunnable = new Runnable() {
+                public void run() {
+                    try {
+                        if (!vvPlayVideo.isPlaying()) {
+                            vvPlayVideo.resume();
+                        }
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    vvHandler.postDelayed(vvRunnable, 1000);
+                }
+            };
+
+            vvHandler.postDelayed(vvRunnable, 0);
+        }*/
     }
 
     private void setVideoCOntainerScale1(final boolean reverse, final double scale)

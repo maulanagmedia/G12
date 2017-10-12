@@ -104,6 +104,14 @@ public class MainMenu extends RuntimePermissionsActivity {
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
 
+            if(bundle.getBoolean("splashed", false)){
+                getIntent().putExtra("splashed",false);
+                Intent intent = new Intent(MainMenu.this, ChanelList.class);
+                intent.putExtra("splashed", true);
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+
             if(bundle.getBoolean("exit", false)){
                 exitState = true;
                 overridePendingTransition(android.R.anim.fade_in,android.R.anim.fade_out);

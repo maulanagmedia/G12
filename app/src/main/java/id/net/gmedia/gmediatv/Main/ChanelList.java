@@ -182,7 +182,7 @@ public class ChanelList extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                setListChanel(masterList, x);
+                setListChanel(masterList, savedC);
                 pbLoading.setVisibility(View.GONE);
             }
 
@@ -200,6 +200,20 @@ public class ChanelList extends AppCompatActivity {
         rvChanggelList.setAdapter(null);
 
         if(listItem != null && listItem.size() > 0){
+
+            Bundle bundle = getIntent().getExtras();
+            if(bundle != null){
+
+                if(bundle.getBoolean("splashed", false)){
+                    getIntent().putExtra("splashed",false);
+                    CustomItem item = listItem.get(saved);
+                    Intent intent = new Intent(ChanelList.this, ChannelViewScreen.class);
+                    intent.putExtra("nama", item.getItem2());
+                    intent.putExtra("link", item.getItem3());
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                }
+            }
 
             final AllChannelAdapter menuAdapter = new AllChannelAdapter(ChanelList.this, listItem);
 

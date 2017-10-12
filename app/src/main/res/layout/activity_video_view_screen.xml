@@ -39,36 +39,41 @@
                 android:id="@+id/pb_loading"
                 android:visibility="gone"/>
 
-            <ImageView
-                android:layout_width="120dp"
-                android:layout_height="70dp"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentBottom="true"
-                android:id="@+id/iv_tv_logo"
                 android:layout_marginLeft="12dp"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal"
+                android:weightSum="1"
+                android:gravity="center_vertical|left">
+
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="45dp"
+                    android:id="@+id/iv_tv_logo"
+                    android:src="@drawable/logotv_animation"/>
+
+                <id.net.gmedia.gmediatv.CustomView.ScrollTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/tv_user"
+                    android:visibility="gone"
+                    android:textSize="20sp"
+                    android:alpha="0.8"
+                    android:padding="4dp"
+                    android:background="@color/color_blue_dark"
+                    android:textColor="@color/color_text_marquee"/>
+
+            </LinearLayout>
+
         </RelativeLayout>
 
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:text="Selamat Datang "
-            android:visibility="gone"
-            android:layout_alignParentBottom="true"
-            android:id="@+id/tv_user"
-            android:textColor="@color/color_text_marquee"
-            android:background="@color/color_blue_dark"
-            android:textSize="20sp"
-            android:alpha="0.9"
-            android:padding="4dp"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"
-            android:scrollHorizontally="true" />
 
     </RelativeLayout>
 
