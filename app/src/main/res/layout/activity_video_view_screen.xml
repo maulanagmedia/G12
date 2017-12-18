@@ -20,8 +20,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/rv_screen_container"
-            android:background="@color/color_white">
+            android:id="@+id/rv_screen_container">
 
             <id.net.gmedia.gmediatv.Utils.CustomVideoView
                 android:layout_width="match_parent"
@@ -84,7 +83,7 @@
         android:weightSum="1">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_weight="0.35"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -171,4 +170,15 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rv_screen_container2">
+
+        <com.google.android.youtube.player.YouTubePlayerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/yp_youtube"></com.google.android.youtube.player.YouTubePlayerView>
+    </RelativeLayout>
 </RelativeLayout>

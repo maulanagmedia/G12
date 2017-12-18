@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '26.0.1'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "id.net.gmedia.gmediatv"
         minSdkVersion 21
         targetSdkVersion 23
-        versionCode 3
-        versionName '3.0'
+        versionCode 4
+        versionName '4.0'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

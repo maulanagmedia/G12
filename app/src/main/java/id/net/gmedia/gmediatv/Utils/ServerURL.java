@@ -11,9 +11,11 @@ import java.net.URI;
 public class ServerURL {
 
     public static String baseUrl = "http://gmediatv.gmedia.bz/";
+    //public static String baseUrl = "http://192.168.12.74/gmedia_tv/";
 
     public static String getLink = baseUrl + "api/link/get_link/";
     //public static String getLink = baseUrl + "api/link/get_link_dummy/";
+    public static String getTimerTV = baseUrl + "api/link/get_timer_tv/";
     public static String getAds = baseUrl + "api/link/get_ads/";
     public static String getAppearText = baseUrl + "api/link/get_appear_text/";
     public static String getLogo = baseUrl + "api/link/get_logo/";

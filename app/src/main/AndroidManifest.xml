@@ -42,6 +42,7 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".Main.ChannelViewScreen"
+            android:configChanges="orientation"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
         <activity
@@ -53,16 +54,24 @@
             android:name=".Main.MainMenu"
             android:screenOrientation="landscape"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
-        <activity android:name=".Main.ChanelList"
+        <activity
+            android:name=".Main.ChanelList"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"></activity>
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+
         <receiver android:name=".Utils.CustomReciever">
-            <intent-filter >
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <service android:name=".Utils.ServiceTimerServer"
-            android:exported="false"></service>
+
+        <service
+            android:name=".Utils.ServiceTimerServer"
+            android:exported="false" />
+
+        <activity android:name=".Youtube.YoutubeTester"
+            android:screenOrientation="landscape"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"></activity>
     </application>
 
 </manifest>

@@ -69,6 +69,11 @@ public class ImageUtils {
         Picasso.with(context).load(Uri.parse(uri)).into(image);
     }
 
+    public void LoadRealImageNoCacheTV(Context context, String uri, final ImageView image){
+
+        Picasso.with(context).load(Uri.parse(uri)).error(context.getResources().getDrawable(R.drawable.ic_tv_thumb)).centerInside().resize(100, 100).into(image);
+    }
+
     public void LoadRealImage(Context context, int uri, final ImageView image){
 
         Picasso.with(context).load(uri).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).error(context.getResources().getDrawable(R.drawable.ic_thumbnail)).placeholder(context.getResources().getDrawable(R.drawable.ic_thumbnail)).into(image);
@@ -93,6 +98,13 @@ public class ImageUtils {
 
         //Glide.with(context).load(Uri.parse(uri)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
         Glide.with(context).load(Uri.parse(uri)).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).error(context.getResources().getDrawable(thumbnail)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
+    }
+
+    public void LoadGIFImage(Context context, String uri, final ImageView image){
+
+        final int thumbnail = R.drawable.ic_tv_thumb;
+        //Glide.with(context).load(Uri.parse(uri)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
+        Glide.with(context).load(Uri.parse(uri)).override(200 , 200).skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).error(context.getResources().getDrawable(thumbnail)).placeholder(context.getResources().getDrawable(thumbnail)).into(image);
     }
 
     public static Bitmap decodeBitmap(Uri bitmapUri, ContentResolver resolver, int width, int height) throws IOException {
