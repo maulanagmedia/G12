@@ -6,13 +6,12 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.animation.LinearInterpolator;
 import android.widget.Scroller;
-import android.widget.TextView;
 
 /**
  * Created by Shinmaul on 10/12/2017.
  */
 
-public class ScrollTextView extends android.support.v7.widget.AppCompatTextView {
+public class ScrollTextView extends androidx.appcompat.widget.AppCompatTextView {
 
     // scrolling feature
     private Scroller mSlr;

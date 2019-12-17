@@ -76,13 +76,13 @@ install {
 //////////////////////////////// Upload to BinTray ////////////////////////////////
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 28
     buildToolsVersion '28.0.3'
     resourcePrefix "carousellayoutmanager__"
 
     defaultConfig {
         minSdkVersion 11
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 1
         versionName version
     }
@@ -99,11 +99,11 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:support-v4:26.1.0'
-    implementation 'com.android.support:design:26.1.0'
-    implementation 'com.android.support:recyclerview-v7:26.1.0'
-    javadocDeps 'com.android.support:support-annotations:26.1.0'
-    javadocDeps 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    javadocDeps 'androidx.annotation:annotation:1.0.0'
+    javadocDeps 'androidx.recyclerview:recyclerview:1.0.0'
 }
 
 task sourcesJar(type: Jar) {

@@ -80,13 +80,13 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginRight="@dimen/default_vertical_margin"
                 android:layout_marginLeft="@dimen/default_vertical_margin"
                 android:nestedScrollingEnabled="false"
-                android:id="@+id/rv_youtube"></android.support.v7.widget.RecyclerView>
+                android:id="@+id/rv_youtube"></androidx.recyclerview.widget.RecyclerView>
 
             <ProgressBar
                 android:layout_width="match_parent"

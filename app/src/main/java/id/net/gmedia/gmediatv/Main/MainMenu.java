@@ -15,9 +15,9 @@ import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -48,7 +48,6 @@ import java.util.Collections;
 import java.util.List;
 
 import id.net.gmedia.gmediatv.R;
-import id.net.gmedia.gmediatv.RemoteUtils.ConnectionUtil;
 import id.net.gmedia.gmediatv.RemoteUtils.ServiceUtils;
 import id.net.gmedia.gmediatv.Utils.FormatItem;
 import id.net.gmedia.gmediatv.Utils.ServerURL;
