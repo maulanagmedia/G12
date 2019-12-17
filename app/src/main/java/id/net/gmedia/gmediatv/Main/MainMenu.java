@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import com.maulana.custommodul.ApiVolley;
 import com.maulana.custommodul.ApkInstaller;
 import com.maulana.custommodul.ItemValidation;
+import com.maulana.custommodul.PermissionUtils;
 import com.maulana.custommodul.RuntimePermissionsActivity;
 
 import org.json.JSONException;
@@ -114,9 +116,11 @@ public class MainMenu extends RuntimePermissionsActivity {
 
         // For Remote access
         //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(MainMenu.this);
-        mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-        registerService(ServiceUtils.DEFAULT_PORT);
-        initializeReceiver();
+        if (Build.VERSION.SDK_INT >= 21) {
+            mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+            registerService(ServiceUtils.DEFAULT_PORT);
+            initializeReceiver();
+        }
     }
 
     @Override
@@ -337,7 +341,7 @@ public class MainMenu extends RuntimePermissionsActivity {
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
 
-            if(bundle.getBoolean("splashed", false)){
+            if(bundle.getBoolean("splashed", false) && PermissionUtils.hasPermissions(MainMenu.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) && PermissionUtils.hasPermissions(MainMenu.this, Manifest.permission.READ_EXTERNAL_STORAGE)){
                 getIntent().putExtra("splashed",false);
                 Intent intent = new Intent(MainMenu.this, ChanelList.class);
                 intent.putExtra("splashed", true);
@@ -511,7 +515,9 @@ public class MainMenu extends RuntimePermissionsActivity {
         }
 
         try {
-            serverSocket.close();
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -520,13 +526,39 @@ public class MainMenu extends RuntimePermissionsActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStop() {
+
         if (mNsdManager != null) {
-            registerService(ServiceUtils.DEFAULT_PORT);
+            try{
+                mNsdManager.unregisterService(mRegistrationListener);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
-        initializeReceiver();
+        try {
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (Build.VERSION.SDK_INT >= 21) {
+            if (mNsdManager != null) {
+                registerService(ServiceUtils.DEFAULT_PORT);
+            }
+
+            initializeReceiver();
+        }
+
     }
 
     @Override
@@ -542,7 +574,9 @@ public class MainMenu extends RuntimePermissionsActivity {
         }
 
         try {
-            serverSocket.close();
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

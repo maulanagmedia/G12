@@ -9,6 +9,7 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -82,9 +83,11 @@ public class ChanelList extends AppCompatActivity {
 
         // For Remote access
         //ServiceUtils.DEFAULT_PORT = ConnectionUtil.getPort(ServerActivity.this);
-        mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-        registerService(ServiceUtils.DEFAULT_PORT);
-        initializeReceiver();
+        if (Build.VERSION.SDK_INT >= 21) {
+            mNsdManager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+            registerService(ServiceUtils.DEFAULT_PORT);
+            initializeReceiver();
+        }
     }
 
     private void initUI() {
@@ -193,6 +196,15 @@ public class ChanelList extends AppCompatActivity {
                 pbLoading.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(ChanelList.this, MainMenu.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+        finish();
     }
 
     private void setListChanel(List<CustomItem> listItem, int saved){
@@ -326,7 +338,9 @@ public class ChanelList extends AppCompatActivity {
         }
 
         try {
-            serverSocket.close();
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -335,16 +349,40 @@ public class ChanelList extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+
+        if (mNsdManager != null) {
+            try{
+                mNsdManager.unregisterService(mRegistrationListener);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        super.onStop();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
         getDataWithConnection();
 
-        if (mNsdManager != null) {
-            registerService(ServiceUtils.DEFAULT_PORT);
-        }
+        if (Build.VERSION.SDK_INT >= 21) {
+            if (mNsdManager != null) {
+                registerService(ServiceUtils.DEFAULT_PORT);
+            }
 
-        initializeReceiver();
+            initializeReceiver();
+        }
     }
 
     @Override
@@ -360,7 +398,9 @@ public class ChanelList extends AppCompatActivity {
         }
 
         try {
-            serverSocket.close();
+            if (Build.VERSION.SDK_INT >= 21) {
+                serverSocket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

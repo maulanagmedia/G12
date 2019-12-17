@@ -15,6 +15,8 @@ import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -57,9 +59,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -84,7 +90,7 @@ import id.net.gmedia.gmediatv.Utils.ServerURL;
 import id.net.gmedia.gmediatv.Youtube.YoutubePlayerActivity;
 import id.net.gmedia.gmediatv.Youtube.YoutubeTester;
 
-public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener{
+public class ChannelViewScreen extends AppCompatActivity /*YouTubeBaseActivity implements YouTubePlayer.OnInitializedListener*/{
 
     private static CustomVideoView vvPlayVideo;
     private ItemValidation iv = new ItemValidation();
@@ -125,7 +131,8 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
     private ServerSocket serverSocket;
     private SocketServerThread socketServerThread;
     private final String TAG = "Chanel";
-    private static RelativeLayout rvScreenContainer, rvScreenContainer2;
+    private static RelativeLayout rvScreenContainer;
+    //private static RelativeLayout rvScreenContainer2;
     private WebView wvAds;
     private List<CustomItem> adsList;
     private boolean isLoad = true;
@@ -146,9 +153,9 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
     private RelativeLayout rlUpContainer;
 
     //Youtube
-    private static YouTubePlayerView ypYoutube;
-    private static boolean isYoutube = false;
-    private static YouTubePlayer youtubePlayer;
+    //private static YouTubePlayerView ypYoutube;
+    //private static boolean isYoutube = false;
+    //private static YouTubePlayer youtubePlayer;
     private static final String masterYoutubeURL = "https://youtu.be/";
     private static final int RECOVERY_REQUEST = 1;
     private static YouTubePlayer.OnInitializedListener youtubeListener;
@@ -156,6 +163,11 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
     private Timer timerAds;
     private CountDownTimer cAdsTimer;
     private CountDownTimer cNormalAdsTimer;
+
+    private static final int MESSAGE_RTSP_OK = 1;
+    private static final int MESSAGE_RTSP_ERROR = -1;
+
+    private static Handler handler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,10 +181,11 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         scaleVideo = 1;
         isFullScreen = true;
         isFirstLoad = true;
-        isYoutube = false;
+        //isYoutube = false;
         itemOnSelect = false;
         scaleVideo = 1;
         isLoad = true;
+
         savedChanel = new SavedChanelManager(ChannelViewScreen.this);
         Bundle bundle = getIntent().getExtras();
         if(bundle != null){
@@ -195,8 +208,8 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
 
         tvVolume = (TextView) findViewById(R.id.tv_volume);
         sbVolume = (SeekBar) findViewById(R.id.sb_volume);
-        ypYoutube = (YouTubePlayerView) findViewById(R.id.yp_youtube);
-        ypYoutube.initialize(GoogleAPI.APIKey, this);
+        /*ypYoutube = (YouTubePlayerView) findViewById(R.id.yp_youtube);
+        ypYoutube.initialize(GoogleAPI.APIKey, this);*/
         vvPlayVideo = (CustomVideoView) findViewById(R.id.vv_stream);
         llYoutubeContainer = (LinearLayout) findViewById(R.id.ll_youtube_container);
         rvChannel = (RecyclerView) findViewById(R.id.rv_chanel);
@@ -209,7 +222,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         llChannelSelector = (LinearLayout) findViewById(R.id.ll_channel_selector);
         tvChannelSelector = (TextView) findViewById(R.id.tv_channel_selector);
         rvScreenContainer = (RelativeLayout) findViewById(R.id.rv_screen_container);
-        rvScreenContainer2 = (RelativeLayout) findViewById(R.id.rv_screen_container2);
+        /*rvScreenContainer2 = (RelativeLayout) findViewById(R.id.rv_screen_container2);*/
         wvAds = (WebView) findViewById(R.id.wv_ads);
         wvAds.setWebViewClient(new WebViewClient());
         tvUser = (ScrollTextView) findViewById(R.id.tv_user);
@@ -240,7 +253,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             }
         });
 
-        ypYoutube.setOnTouchListener(new View.OnTouchListener() {
+        /*ypYoutube.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
 
@@ -260,7 +273,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
                 tapped = true;
                 showNavigationItem(ChannelViewScreen.this);
             }
-        });
+        });*/
 
         sbVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -887,49 +900,49 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         }
     }
 
-    public static void playVideo(final Context context, String nama, String url){
+    public static void playVideo(final Context context, final String nama, final String url){
 
         itemOnSelect = false;
         tapped = true;
         showNavigationItem(context);
 
-        if(url.contains(masterYoutubeURL)){
+        /*if(url.contains(masterYoutubeURL)){
             isYoutube = true;
         }else{
             isYoutube = false;
-        }
+        }*/
 
         vvPlayVideo.stopPlayback();
         vvPlayVideo.clearAnimation();
         vvPlayVideo.suspend();
         vvPlayVideo.setVideoURI(null);
 
-        try {
+        /*try {
             if(youtubePlayer != null && youtubePlayer.isPlaying()){
                 youtubePlayer.pause();
             }
         }catch (Exception e){
             e.printStackTrace();
-        }
+        }*/
 
 
         pbLoading.setVisibility(View.VISIBLE);
         /*MediaController mediaController = new MediaController(ChannelViewScreen.this);
         mediaController.setAnchorView(vvPlayVideo);*/
 
-        if(isYoutube){
+        if(/*isYoutube*/ false){
 
             /*rvScreenContainer.setVisibility(View.GONE);
             rvScreenContainer2.setVisibility(View.VISIBLE);*/
             //isFullScreen = true;
-            vvPlayVideo.setVisibility(View.GONE);
+            /*vvPlayVideo.setVisibility(View.GONE);
             ypYoutube.setVisibility(View.VISIBLE);
             pbLoading.setVisibility(View.GONE);
 
             String youtTubeID = url.replace(masterYoutubeURL,"");
             savedChanel.saveLastChanel(nama, url);
             playVideo(context, youtTubeID);
-            fullScreenVideo(context, scaleVideo);
+            fullScreenVideo(context, scaleVideo);*/
 
             /*ypYoutube.clearFocus();
             ypYoutube.setHovered(false);
@@ -942,13 +955,48 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             /*rvScreenContainer.setVisibility(View.VISIBLE);
             rvScreenContainer2.setVisibility(View.GONE);*/
             vvPlayVideo.setVisibility(View.VISIBLE);
-            ypYoutube.setVisibility(View.GONE);
+            //ypYoutube.setVisibility(View.GONE);
 
-            Uri uri = Uri.parse(url);
-            savedChanel.saveLastChanel(nama, url);
-            vvPlayVideo.setVideoURI(uri);
-            //vvPlayVideo.setMediaController(mediaController);
-            vvPlayVideo.requestFocus();
+            if (Looper.myLooper() == null)
+            {
+                Looper.prepare();
+            }
+            new Thread(new Runnable() {
+                public void run() {
+
+                    ((Activity)context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            try {
+
+                                vvPlayVideo.stopPlayback();
+                                vvPlayVideo.clearAnimation();
+                                vvPlayVideo.suspend();
+                                vvPlayVideo.setVideoURI(null);
+
+                                Uri uri = Uri.parse(url);
+                                savedChanel.saveLastChanel(nama, url);
+                                vvPlayVideo.setVideoURI(uri);
+                                //vvPlayVideo.setMediaController(mediaController);
+                                vvPlayVideo.requestFocus();
+
+                            } catch (Exception e) {
+                                // NETWORK ERROR such as Timeout
+                                e.printStackTrace();
+
+                                pbLoading.setVisibility(View.GONE);
+                                vvPlayVideo.stopPlayback();
+                                vvPlayVideo.clearAnimation();
+                                vvPlayVideo.suspend();
+                                vvPlayVideo.setVideoURI(null);
+                                Toast.makeText(context, "Channel sudah tidak tersedia", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                }
+            }).start();
+
             //vvPlayVideo.seekTo(100);
 
         /*if(masterList != null && masterList.size() > 0){
@@ -1059,9 +1107,9 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         final DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         final RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rvScreenContainer.getLayoutParams();
-        final RelativeLayout.LayoutParams params2 = (RelativeLayout.LayoutParams) rvScreenContainer2.getLayoutParams();
+        //final RelativeLayout.LayoutParams params2 = (RelativeLayout.LayoutParams) rvScreenContainer2.getLayoutParams();
         params.leftMargin = 0;
-        params2.leftMargin = 0;
+        //params2.leftMargin = 0;
 
         if(isFullScreen){
             /*if(isYoutube){
@@ -1087,12 +1135,12 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             rvScreenContainer.setPivotX(0);
             rvScreenContainer.setPivotY(0);
 
-            params2.width = (int) (metrics.widthPixels * 1);
+            /*params2.width = (int) (metrics.widthPixels * 1);
             params2.height = (int) (metrics.heightPixels * 1);
             rvScreenContainer2.setScaleX(endScale);
             rvScreenContainer2.setScaleY(endScale);
             rvScreenContainer2.setPivotX(0);
-            rvScreenContainer2.setPivotY(0);
+            rvScreenContainer2.setPivotY(0);*/
         }
 
         Animation anim = new ScaleAnimation(
@@ -1144,7 +1192,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
                             params.width = (int) (metrics.widthPixels * endScale);
                             params.height = (int) (metrics.heightPixels * endScale);
                         }
-                        //fullScreenVideo(ChannelViewScreen.this, endScale);
+                        fullScreenVideo(ChannelViewScreen.this, endScale);
                     }
                 });
             }
@@ -1155,7 +1203,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             }
         });
 
-        Animation anim2 = new ScaleAnimation(
+        /*Animation anim2 = new ScaleAnimation(
                 startScale, endScale, // Start and end values for the X axis scaling
                 startScale, endScale, // Start and end values for the Y axis scaling
                 Animation.RELATIVE_TO_SELF, 0f, // Pivot point of X scaling
@@ -1174,7 +1222,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
                     @Override
                     public void run() {
                         if(!isFullScreen){
-                            /*if(isYoutube){
+                            *//*if(isYoutube){
 
                                 rvScreenContainer2.clearAnimation();
                                 rvScreenContainer2.setScaleX(1);
@@ -1193,7 +1241,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
 
                                 params.width = (int) (metrics.widthPixels * endScale);
                                 params.height = (int) (metrics.heightPixels * endScale);
-                            }*/
+                            }*//*
 
                             rvScreenContainer2.clearAnimation();
                             rvScreenContainer2.setScaleX(1);
@@ -1213,9 +1261,9 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             public void onAnimationRepeat(Animation animation) {
 
             }
-        });
+        });*/
         rvScreenContainer.startAnimation(anim);
-        rvScreenContainer2.startAnimation(anim2);
+        //rvScreenContainer2.startAnimation(anim2);
     }
 
     private void backNormalScale1(int Seconds, final double scale){
@@ -1250,7 +1298,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         }else{
             RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) vvPlayVideo.getLayoutParams();
         }*/
-        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ypYoutube.getLayoutParams();
+        //RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) ypYoutube.getLayoutParams();
         RelativeLayout.LayoutParams params2 = (RelativeLayout.LayoutParams) vvPlayVideo.getLayoutParams();
 
         if(isFullScreen){
@@ -1264,11 +1312,11 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         newparams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         newparams.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 
-        RelativeLayout.LayoutParams newparams2 = new RelativeLayout.LayoutParams((int) doubleWidth,(int) doubleHeight);
+        /*RelativeLayout.LayoutParams newparams2 = new RelativeLayout.LayoutParams((int) doubleWidth,(int) doubleHeight);
         newparams2.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
         newparams2.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         newparams2.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
-        newparams2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+        newparams2.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);*/
 
         /*params.width =  rvScreenContainer.getMeasuredWidth();
         params.height = rvScreenContainer.getMeasuredHeight();*/
@@ -1280,7 +1328,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
         }*/
 
         vvPlayVideo.setLayoutParams(newparams);
-        ypYoutube.setLayoutParams(newparams2);
+        //ypYoutube.setLayoutParams(newparams2);
 
 
     }
@@ -1322,7 +1370,10 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
                 cNormalAdsTimer.cancel();
                 cNormalAdsTimer = null;
             }
-            super.onBackPressed();
+            //super.onBackPressed();
+            Intent intent = new Intent(ChannelViewScreen.this, ChanelList.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
             finish();
         }
     }
@@ -1733,6 +1784,26 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
     }
 
     @Override
+    protected void onStop() {
+
+        if (mNsdManager != null) {
+            try{
+                mNsdManager.unregisterService(mRegistrationListener);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            serverSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        super.onStop();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
 
@@ -1762,9 +1833,9 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
             e.printStackTrace();
         }
 
-        if (youtubePlayer != null) {
+        /*if (youtubePlayer != null) {
             youtubePlayer.pause();
-        }
+        }*/
 
         super.onDestroy();
     }
@@ -1825,7 +1896,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
 
     public static void playVideo(final Context context, final String id){
 
-        try {
+        /*try {
 
             youtubePlayer.loadVideo(id);
 
@@ -1872,15 +1943,15 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
 
         }catch (Exception e){
             e.printStackTrace();
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
 
         youtubePlayer = youTubePlayer;
-        /*player.setPlayerStateChangeListener(playerStateChangeListener);
-        player.setPlaybackEventListener(playbackEventListener);*/
+        *//*player.setPlayerStateChangeListener(playerStateChangeListener);
+        player.setPlaybackEventListener(playbackEventListener);*//*
 
         if(isYoutube){
 
@@ -1962,7 +2033,7 @@ public class ChannelViewScreen extends YouTubeBaseActivity implements YouTubePla
 
     protected static YouTubePlayer.Provider getYouTubePlayerProvider() {
         return ypYoutube;
-    }
+    }*/
 
     // Custom Class for youtube naviagation
 
